@@ -63,3 +63,19 @@ def test_fresh_file_not_stale():
         )
         stale = m.stale_files(root, ["bar.py"])
         assert "bar.py" not in stale
+
+def test_load_manifest_missing_component_ids():
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        manifest_path = root / ".indexer" / "manifest.json"
+        manifest_path.parent.mkdir(parents=True)
+        # Write manifest JSON without component_ids (old schema)
+        manifest_path.write_text(json.dumps({
+            "last_indexed_commit": "abc",
+            "indexed_at": "2026-04-09T10:00:00Z",
+            "files": {
+                "old/file.py": {"hash": "sha256:xyz", "wiki_page": "wiki/old.md"}
+            }
+        }))
+        m = load_manifest(root)
+        assert m.files["old/file.py"].component_ids == []

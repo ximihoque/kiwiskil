@@ -40,7 +40,11 @@ def load_manifest(repo_root: Path) -> Manifest:
         return Manifest(last_indexed_commit=None, indexed_at="", files={})
     data = json.loads(path.read_text())
     files = {
-        k: FileEntry(**v)
+        k: FileEntry(
+            hash=v["hash"],
+            wiki_page=v["wiki_page"],
+            component_ids=v.get("component_ids", []),
+        )
         for k, v in data.get("files", {}).items()
     }
     return Manifest(
