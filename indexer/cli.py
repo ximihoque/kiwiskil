@@ -102,6 +102,18 @@ def run(staged: bool, force: bool):
         click.echo("No symbols found.")
         return
 
+    # Cross-reference pass: populate called_by from calls graph
+    # Note: calls stores bare function/method names (e.g. "sign_payload"), not full component IDs.
+    # This is best-effort: correctly links calls within the same codebase batch.
+    call_index: dict[str, list[str]] = {}
+    for node in all_nodes:
+        for callee_name in node.calls:
+            call_index.setdefault(callee_name, []).append(node.id)
+    for node in all_nodes:
+        # Match by bare name (last part of component ID after "::")
+        bare_name = node.id.split("::")[-1]
+        node.called_by = call_index.get(bare_name, [])
+
     # LLM: describe nodes in batches by token budget
     descriptions: dict[str, str] = {}
     batch, batch_size = [], 0
@@ -169,6 +181,14 @@ def run(staged: bool, force: bool):
             )
     manifest.last_indexed_commit = commit
     manifest.indexed_at = now
+
+    # Prune manifest entries for files no longer tracked by git
+    if is_git_repo(root):
+        tracked = set(all_tracked_files(root))
+        stale_keys = [k for k in manifest.files if k not in tracked]
+        for k in stale_keys:
+            del manifest.files[k]
+
     save_manifest(root, manifest)
 
     # Synthesize commit message

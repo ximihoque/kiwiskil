@@ -65,7 +65,7 @@ def build_index(entries: list[IndexEntry], last_commit: str, indexed_date: str) 
 
 def write_page(wiki_dir: Path, group_label: str, content: str) -> Path:
     # Sanitise group_label for use as filename: replace "/" with "_"
-    safe_name = group_label.replace("/", "_").strip("_") or "root"
+    safe_name = group_label.replace("/", "_").strip("_").strip(".") or "root"
     page_path = wiki_dir / f"{safe_name}.md"
     page_path.parent.mkdir(parents=True, exist_ok=True)
     page_path.write_text(content)
