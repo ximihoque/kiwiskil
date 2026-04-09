@@ -1,28 +1,89 @@
 ---
 name: codebase
-description: Navigate this codebase's wiki. Use before reading any source files.
+description: Navigate this codebase. Load this before reading any source file or answering any code question.
 ---
+
+# Codebase Navigation Instructions
+
+This repo is indexed. **Do not read source files until you have checked the wiki.** The wiki gives you structure, relationships, and constraints in a fraction of the tokens.
+
+## Stats
+
+- **{{ total_symbols }} symbols** across **{{ total_files }} files** — indexed {{ indexed_date }} @ `{{ commit[:8] }}`
+- Wiki: `{{ wiki_dir }}/` — {{ pages | length }} page(s)
+- Manifest: `.indexer/manifest.json` — maps every file to its wiki page and component IDs
+{% if overview %}
+
+## System Overview
+
+{{ overview }}
+{% endif %}
+{% if key_flows %}
+## Key Request Flows
+{% for flow in key_flows %}
+- {{ flow }}
+{% endfor %}
+{% endif %}
 
 ## Wiki Pages
 
+| Page | Covers | Key Entry Points |
+|------|--------|-----------------|
 {% for page in pages -%}
-- [{{ page.label }}](../{{ page.path }}) — {{ page.covers }}
+| [{{ page.label }}](../{{ page.path }}) | {{ page.covers }} | {{ page.entry_points | join(", ") }} |
 {% endfor %}
+{% if pages | selectattr("enrichment") | selectattr("enrichment.constraints") | list %}
+## Critical Constraints (read before editing)
+{% for page in pages %}
+{% if page.enrichment and page.enrichment.constraints %}
+**{{ page.label }}**
+{% for c in page.enrichment.constraints %}
+- {{ c }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
 
-## How to Use
+## How to Answer Questions About This Codebase
 
-**Before reading any source file**, check the wiki first:
+**Step 1 — Orient:** Read `{{ wiki_dir }}/INDEX.md` first. It has the system overview and cross-cutting flows.
 
-1. **Find a module:** Read `{{ wiki_dir }}/INDEX.md` for the full structure map
-2. **Look up a symbol:** Search wiki pages for `file::Class.method` component IDs
-3. **Trace callers:** Check the `## Relationships → Called by` section on the relevant wiki page
-4. **Find entry points:** See `## Entry Points` on any wiki page, or the Entry Points column in `{{ wiki_dir }}/INDEX.md`
+**Step 2 — Find the module:** Match the question to a wiki page from the table above. Read that page only.
+
+**Step 3 — Look up symbols:** Component IDs follow `relative/path.py::ClassName.method_name`. Find them in the wiki page's Key Symbols table.
+
+**Step 4 — Trace calls:** Use `## Relationships → Called by` on the wiki page to trace callers without reading source.
+
+**Step 5 — Read source only if needed:** Once you know exactly which file and line range, read the source. Prefer the wiki for everything else.
+
+## When to Read Source vs Wiki
+
+| Question type | Use |
+|--------------|-----|
+| What does X do? | Wiki — Key Symbols table |
+| Who calls X? | Wiki — Relationships → Called by |
+| What does this module own? | Wiki — Modules table |
+| How does a request flow end-to-end? | Wiki — Data Flows section (if --deep indexed) |
+| What are the gotchas? | Wiki — Design Constraints section (if --deep indexed) |
+| What's the exact implementation? | Source file — use line_start/line_end from manifest |
+| Is X tested? | Source — check test files directly |
 
 ## Component ID Format
 
-All symbols follow: `relative/path.py::ClassName.method_name`
+```
+relative/path.py::ClassName.method_name   ← method
+relative/path.py::ClassName               ← class
+relative/path.py::function_name           ← top-level function
+```
 
-Examples:
-- `auth/session.py::SessionStore` — the SessionStore class
-- `auth/session.py::SessionStore.find_or_create_api_key_session` — a specific method
-- `main.py::startup` — a top-level function
+## Manifest Lookup
+
+To find which wiki page covers a file:
+```
+.indexer/manifest.json → files["path/to/file.py"] → wiki_page
+```
+
+To find all symbols in a file:
+```
+.indexer/manifest.json → files["path/to/file.py"] → component_ids
+```

@@ -241,10 +241,25 @@ def run(staged: bool, force: bool, deep: bool):
     skill_dir.mkdir(parents=True, exist_ok=True)
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)), trim_blocks=True, lstrip_blocks=True)
     skill_pages = [
-        {"label": e.path.split("/")[-1].replace(".md", ""), "path": e.path, "covers": e.covers}
+        {
+            "label": e.path.split("/")[-1].replace(".md", ""),
+            "path": e.path,
+            "covers": e.covers,
+            "entry_points": e.entry_points[:5],
+            "enrichment": page_enrichments.get(e.path.split("/")[-1].replace(".md", ""), {}),
+        }
         for e in index_entries
     ]
-    skill_content = env.get_template("skill.md.j2").render(wiki_dir=cfg.wiki_dir, pages=skill_pages)
+    skill_content = env.get_template("skill.md.j2").render(
+        wiki_dir=cfg.wiki_dir,
+        pages=skill_pages,
+        overview=index_overview,
+        key_flows=index_flows,
+        total_symbols=total_symbols,
+        total_files=len(candidates),
+        commit=commit,
+        indexed_date=today,
+    )
     (skill_dir / "codebase.md").write_text(skill_content)
     click.echo(f"    ✓  .indexer/skills/codebase.md")
 
