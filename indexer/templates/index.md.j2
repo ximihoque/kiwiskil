@@ -1,0 +1,10 @@
+# Codebase Index
+
+## Structure
+| Wiki Page | Covers | Entry Points |
+|-----------|--------|--------------|
+{% for page in pages -%}
+| {{ page.path }} | {{ page.covers }} | {{ page.entry_points | join(", ") }} |
+{% endfor %}
+## Last Indexed
+Commit: {{ last_commit }} — {{ indexed_date }}

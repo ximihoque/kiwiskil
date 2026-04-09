@@ -1,0 +1,23 @@
+# {{ group_label }}/
+
+## Modules
+| File | Purpose |
+|------|---------|
+{% for file, desc in modules.items() -%}
+| {{ file }} | {{ desc }} |
+{% endfor %}
+## Key Symbols
+| ID | Type | Description |
+|----|------|-------------|
+{% for node in nodes -%}
+| `{{ node.id }}` | {{ node.type }} | {{ descriptions.get(node.id, "") }} |
+{% endfor %}
+## Relationships
+{% if all_calls %}- **Calls:** {{ all_calls | join(", ") }}
+{% endif %}{% if all_called_by %}- **Called by:** {{ all_called_by | join(", ") }}
+{% endif %}{% if all_imports %}- **Imports from:** {{ all_imports | join(", ") }}
+{% endif %}
+## Entry Points
+{% for ep in entry_points -%}
+- `{{ ep }}`
+{% endfor %}
