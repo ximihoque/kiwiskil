@@ -3,3 +3,6 @@ litellm>=1.35
 jinja2>=3.1
 tomli-w>=1.0
 pytest>=8.0
+tree-sitter
+tree-sitter-javascript
+tree-sitter-typescript

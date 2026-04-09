@@ -58,6 +58,12 @@ def _get_class_method_ids(tree: ast.Module) -> set[int]:
 
 def parse_file(path: Path, repo_root: Path) -> list[ASTNode]:
     """Parse a Python file and return ASTNode list. Returns [] on syntax error."""
+    suffix = path.suffix.lower()
+    
+    if suffix in {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}:
+        from indexer.js_parser import parse_js_file
+        return parse_js_file(path, repo_root)
+    
     try:
         source = path.read_text(encoding="utf-8", errors="replace")
         tree = ast.parse(source)
