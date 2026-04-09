@@ -5,6 +5,19 @@ from indexer.ast_parser import ASTNode
 from indexer.config import Config
 
 
+def _resolve_api_key(cfg: Config) -> str | None:
+    """
+    api_key_env can be either:
+    - an env var name (e.g. "GROQ_API_KEY") -> look it up from environment
+    - an actual key value (e.g. "gsk_...") -> use it directly
+    """
+    value = cfg.api_key_env
+    # If it contains lowercase letters or special chars typical of keys, treat as direct key
+    if " " not in value and not value.isupper() and not value.replace("_", "").isupper():
+        return value
+    return os.environ.get(value)
+
+
 def describe_nodes(nodes: list[ASTNode], cfg: Config) -> dict[str, str]:
     """
     Send a batch of ASTNodes to LiteLLM.
@@ -13,7 +26,7 @@ def describe_nodes(nodes: list[ASTNode], cfg: Config) -> dict[str, str]:
     """
     import litellm
 
-    api_key = os.environ.get(cfg.api_key_env)
+    api_key = _resolve_api_key(cfg)
 
     prompt_items = [
         {
@@ -41,9 +54,10 @@ def describe_nodes(nodes: list[ASTNode], cfg: Config) -> dict[str, str]:
                 {"role": "system", "content": system},
                 {"role": "user", "content": json.dumps(prompt_items)},
             ],
-            response_format={"type": "json_object"},
         )
         raw = response.choices[0].message.content
+        # Strip markdown fences if model wrapped the JSON
+        raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
         result = json.loads(raw)
         # Ensure all node IDs are present in result (fill missing with "")
         return {n.id: result.get(n.id, "") for n in nodes}
@@ -60,7 +74,7 @@ def synthesize_commit_message(changed_files: list[str], descriptions: dict[str, 
     """
     import litellm
 
-    api_key = os.environ.get(cfg.api_key_env)
+    api_key = _resolve_api_key(cfg)
 
     summary = {
         "changed_files": changed_files,
