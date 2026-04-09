@@ -42,6 +42,14 @@ def init():
     save_config(root, cfg)
     click.echo(f"Created {root / '.indexer.toml'}")
 
+    # Write .indexer/.gitignore to exclude cache but keep manifest + skills
+    indexer_dir = root / ".indexer"
+    indexer_dir.mkdir(exist_ok=True)
+    gitignore = indexer_dir / ".gitignore"
+    if not gitignore.exists():
+        gitignore.write_text("cache/\n")
+        click.echo(f"Created {gitignore.relative_to(root)}")
+
     if is_git_repo(root) and cfg.pre_commit:
         install_hook(root)
         click.echo("Installed pre-commit hook.")
@@ -65,6 +73,9 @@ def run(staged: bool, force: bool):
     root = Path.cwd()
     cfg = load_config(root)
     manifest = load_manifest(root)
+
+    # Ensure cache is gitignored even if user skipped init
+    _ensure_cache_gitignore(root)
 
     # Determine which files to process
     if staged:
@@ -282,6 +293,14 @@ def hook_remove():
     root = Path.cwd()
     remove_hook(root)
     click.echo("Pre-commit hook removed.")
+
+
+def _ensure_cache_gitignore(root: Path) -> None:
+    """Write .indexer/.gitignore to exclude cache/ if it doesn't exist yet."""
+    gitignore = root / ".indexer" / ".gitignore"
+    if not gitignore.exists():
+        gitignore.parent.mkdir(exist_ok=True)
+        gitignore.write_text("cache/\n")
 
 
 def _is_indexable(path: str, cfg: Config) -> bool:
