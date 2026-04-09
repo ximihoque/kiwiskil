@@ -80,67 +80,89 @@ def run(staged: bool, force: bool):
     candidates = [f for f in candidates if _is_indexable(f, cfg)]
 
     if not candidates:
-        click.echo("Nothing to index.")
+        click.echo("  Nothing to index.")
         return
 
-    click.echo(f"Indexing {len(candidates)} file(s)...")
+    mode = "staged" if staged else ("full re-index" if force else "incremental")
+    click.echo(f"\n  kiwiskil  —  {mode}  —  {len(candidates)} file(s)\n")
 
-    # Parse AST (use cache for unchanged files, fresh parse for changed)
+    # ── Phase 1: Parse ────────────────────────────────────────────────────────
+    click.echo("  Parsing")
     all_nodes = []
+    cached_count = 0
     for rel_path in candidates:
         abs_path = root / rel_path
         file_hash = compute_hash_short(abs_path)
         cached = load_cached_nodes(root, file_hash)
         if cached is not None:
             all_nodes.extend(cached)
+            cached_count += 1
+            click.echo(f"    ✓  {rel_path}  (cached)")
         else:
             nodes = parse_file(abs_path, root)
             save_cached_nodes(root, file_hash, nodes)
             all_nodes.extend(nodes)
+            symbol_count = len(nodes)
+            click.echo(f"    ✓  {rel_path}  ({symbol_count} symbol{'s' if symbol_count != 1 else ''})")
 
     if not all_nodes:
-        click.echo("No symbols found.")
+        click.echo("\n  No symbols found.")
         return
 
-    # Cross-reference pass: populate called_by from calls graph
-    # Note: calls stores bare function/method names (e.g. "sign_payload"), not full component IDs.
-    # This is best-effort: correctly links calls within the same codebase batch.
+    total_symbols = len(all_nodes)
+    click.echo(f"\n    {total_symbols} symbols across {len(candidates)} files  ({cached_count} from cache)\n")
+
+    # ── Phase 2: Cross-reference ──────────────────────────────────────────────
+    click.echo("  Cross-referencing calls")
     call_index: dict[str, list[str]] = {}
     for node in all_nodes:
         for callee_name in node.calls:
             call_index.setdefault(callee_name, []).append(node.id)
     for node in all_nodes:
-        # Match by bare name (last part of component ID after "::")
         bare_name = node.id.split("::")[-1]
         node.called_by = call_index.get(bare_name, [])
+    linked = sum(1 for n in all_nodes if n.called_by)
+    click.echo(f"    {linked} symbols linked via call graph\n")
 
-    # LLM: describe nodes in batches by token budget
+    # ── Phase 3: LLM descriptions ─────────────────────────────────────────────
     descriptions: dict[str, str] = {}
     batch, batch_size = [], 0
+    batches = []
     for node in all_nodes:
         node_size = len(node.docstring or "") + len(" ".join(node.calls)) + 50
         if batch_size + node_size > cfg.max_tokens_per_batch and batch:
-            descriptions.update(describe_nodes(batch, cfg))
+            batches.append(batch)
             batch, batch_size = [], 0
         batch.append(node)
         batch_size += node_size
     if batch:
-        descriptions.update(describe_nodes(batch, cfg))
+        batches.append(batch)
 
-    # Describe files (module-level purpose)
+    click.echo(f"  Describing symbols  ({len(batches)} LLM batch{'es' if len(batches) != 1 else ''})")
+    for i, b in enumerate(batches, 1):
+        click.echo(f"    batch {i}/{len(batches)}  ({len(b)} symbols)  ...", nl=False)
+        result = describe_nodes(b, cfg)
+        descriptions.update(result)
+        filled = sum(1 for v in result.values() if v)
+        click.echo(f"  {filled}/{len(b)} described")
+
+    # ── Phase 4: File-level descriptions ─────────────────────────────────────
+    click.echo(f"\n  Describing modules  ({len(set(n.file for n in all_nodes))} files)  ...", nl=False)
     file_nodes: dict[str, list] = {}
     for node in all_nodes:
         file_nodes.setdefault(node.file, []).append(node)
     file_descriptions = describe_files(file_nodes, cfg)
+    filled_files = sum(1 for v in file_descriptions.values() if v)
+    click.echo(f"  {filled_files}/{len(file_nodes)} described\n")
 
-    # Group files → wiki page labels
+    # ── Phase 5: Group → wiki pages ───────────────────────────────────────────
+    click.echo("  Writing wiki")
     groups = density_group(candidates, merge_threshold=cfg.merge_threshold)
     group_nodes: dict[str, list] = {}
     for node in all_nodes:
         group = groups.get(node.file, node.file)
         group_nodes.setdefault(group, []).append(node)
 
-    # Write wiki pages
     wiki_dir = root / cfg.wiki_dir
     index_entries = []
     for group_label, nodes in group_nodes.items():
@@ -159,14 +181,16 @@ def run(staged: bool, force: bool):
             covers=", ".join(sorted({n.file for n in nodes})),
             entry_points=entry_points,
         ))
+        file_list = ", ".join(sorted({n.file for n in nodes}))
+        click.echo(f"    ✓  {page_path.relative_to(root)}  ({len(nodes)} symbols)")
 
-    # Write INDEX.md
+    # ── Phase 6: INDEX + skill ────────────────────────────────────────────────
     commit = current_commit(root) or "unknown"
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     index_content = build_index(index_entries, commit, today)
     write_index(wiki_dir, index_content)
+    click.echo(f"    ✓  {cfg.wiki_dir}/INDEX.md")
 
-    # Write skill file
     from jinja2 import Environment, FileSystemLoader
     skill_dir = root / ".indexer" / "skills"
     skill_dir.mkdir(parents=True, exist_ok=True)
@@ -177,8 +201,9 @@ def run(staged: bool, force: bool):
     ]
     skill_content = env.get_template("skill.md.j2").render(wiki_dir=cfg.wiki_dir, pages=skill_pages)
     (skill_dir / "codebase.md").write_text(skill_content)
+    click.echo(f"    ✓  .indexer/skills/codebase.md")
 
-    # Update manifest
+    # ── Update manifest ────────────────────────────────────────────────────────
     now = datetime.now(timezone.utc).isoformat()
     for rel_path in candidates:
         abs_path = root / rel_path
@@ -193,7 +218,6 @@ def run(staged: bool, force: bool):
     manifest.last_indexed_commit = commit
     manifest.indexed_at = now
 
-    # Prune manifest entries for files no longer tracked by git
     if is_git_repo(root):
         tracked = set(all_tracked_files(root))
         stale_keys = [k for k in manifest.files if k not in tracked]
@@ -202,17 +226,20 @@ def run(staged: bool, force: bool):
 
     save_manifest(root, manifest)
 
-    # Synthesize commit message
+    # ── Commit message synthesis ───────────────────────────────────────────────
     if cfg.synthesize_commit_message and staged:
+        click.echo("\n  Synthesizing commit message  ...", nl=False)
         msg = synthesize_commit_message(candidates, descriptions, cfg)
         if msg:
-            click.echo(f"\nSuggested commit message:\n  {msg}")
+            click.echo(f"\n\n  Suggested commit message:\n    {msg}\n")
+        else:
+            click.echo("  (skipped)\n")
 
     # Auto-stage wiki + manifest when running as pre-commit hook
     if staged and is_git_repo(root):
         subprocess.run(["git", "add", cfg.wiki_dir, ".indexer/manifest.json"], cwd=root)
 
-    click.echo(f"Done. Wiki written to {wiki_dir}/")
+    click.echo(f"\n  Done  —  {len(index_entries)} wiki page(s)  —  {total_symbols} symbols indexed\n")
 
 
 @main.command()
