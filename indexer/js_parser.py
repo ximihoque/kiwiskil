@@ -171,7 +171,7 @@ def parse_js_file(path: Path, repo_root: Path) -> list[ASTNode]:
             return
 
         # ── const/let/var = arrow function or function expression ──────────
-        elif node.type == "lexical_declaration" and not class_name:
+        elif node.type in ("lexical_declaration", "variable_declaration") and not class_name:
             for declarator in node.children:
                 if declarator.type == "variable_declarator":
                     name_node = declarator.child_by_field_name("name")
