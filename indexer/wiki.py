@@ -13,6 +13,7 @@ class PageContext:
     files: list[str]
     nodes: list  # list[ASTNode]
     descriptions: dict[str, str]
+    file_descriptions: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -34,16 +35,23 @@ def build_page(ctx: PageContext) -> str:
     env = _jinja_env()
     tmpl = env.get_template("page.md.j2")
 
-    # modules dict: file -> empty string (descriptions come from LLM per symbol, not per file)
-    modules = {f: "" for f in ctx.files}
+    # modules dict: file -> LLM-generated purpose
+    modules = {f: ctx.file_descriptions.get(f, "") for f in ctx.files}
 
     # Aggregate relationships across all nodes in this page
     all_calls = sorted({c for n in ctx.nodes for c in n.calls})
     all_called_by = sorted({c for n in ctx.nodes for c in n.called_by})
     all_imports = sorted({i for n in ctx.nodes for i in n.imports})
 
-    # Entry points: nodes that nothing calls (called_by is empty)
-    entry_points = [n.id.split("::")[-1] for n in ctx.nodes if not n.called_by]
+    # Entry points: only classes and top-level functions not called by anything in this page
+    # Exclude private helpers (starting with _)
+    entry_points = [
+        n.id.split("::")[-1]
+        for n in ctx.nodes
+        if n.type in ("class", "function")
+        and not n.called_by
+        and not n.id.split("::")[-1].startswith("_")
+    ]
 
     return tmpl.render(
         group_label=ctx.group_label,

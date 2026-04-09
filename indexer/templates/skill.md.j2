@@ -3,24 +3,26 @@ name: codebase
 description: Navigate this codebase's wiki. Use before reading any source files.
 ---
 
-## Tools
+## Wiki Pages
 
-### find_module(query)
-Search wiki pages by keyword. Returns matching wiki page paths.
-Index: {{ wiki_dir }}/INDEX.md
+{% for page in pages -%}
+- [{{ page.label }}](../{{ page.path }}) — {{ page.covers }}
+{% endfor %}
 
-### get_symbol(id)
-Look up a component by ID (format: `file::Class.method`).
-Index: .indexer/manifest.json → files[*].component_ids
+## How to Use
 
-### trace_callers(symbol_id)
-Find what calls a given symbol.
-Source: relevant wiki page → Relationships → Called by
+**Before reading any source file**, check the wiki first:
 
-### what_changed(since_commit)
-List files changed since a commit with their wiki pages.
-Source: .indexer/manifest.json → last_indexed_commit + git log
+1. **Find a module:** Read `{{ wiki_dir }}/INDEX.md` for the full structure map
+2. **Look up a symbol:** Search wiki pages for `file::Class.method` component IDs
+3. **Trace callers:** Check the `## Relationships → Called by` section on the relevant wiki page
+4. **Find entry points:** See `## Entry Points` on any wiki page, or the Entry Points column in `{{ wiki_dir }}/INDEX.md`
 
-### entry_points()
-List all architectural entry points across the codebase.
-Source: {{ wiki_dir }}/INDEX.md → Entry Points column
+## Component ID Format
+
+All symbols follow: `relative/path.py::ClassName.method_name`
+
+Examples:
+- `auth/session.py::SessionStore` — the SessionStore class
+- `auth/session.py::SessionStore.find_or_create_api_key_session` — a specific method
+- `main.py::startup` — a top-level function

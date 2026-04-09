@@ -13,7 +13,7 @@ from indexer.git import (
     changed_files_since, is_git_repo
 )
 from indexer.ast_parser import parse_file, load_cached_nodes, save_cached_nodes, compute_hash_short
-from indexer.llm import describe_nodes, synthesize_commit_message
+from indexer.llm import describe_nodes, describe_files, synthesize_commit_message
 from indexer.grouper import density_group
 from indexer.wiki import build_page, build_index, write_page, write_index, PageContext, IndexEntry, TEMPLATES_DIR
 from indexer.hooks import install_hook, remove_hook
@@ -127,6 +127,12 @@ def run(staged: bool, force: bool):
     if batch:
         descriptions.update(describe_nodes(batch, cfg))
 
+    # Describe files (module-level purpose)
+    file_nodes: dict[str, list] = {}
+    for node in all_nodes:
+        file_nodes.setdefault(node.file, []).append(node)
+    file_descriptions = describe_files(file_nodes, cfg)
+
     # Group files → wiki page labels
     groups = density_group(candidates, merge_threshold=cfg.merge_threshold)
     group_nodes: dict[str, list] = {}
@@ -143,6 +149,7 @@ def run(staged: bool, force: bool):
             files=list({n.file for n in nodes}),
             nodes=nodes,
             descriptions=descriptions,
+            file_descriptions=file_descriptions,
         )
         content = build_page(ctx)
         page_path = write_page(wiki_dir, group_label, content)
@@ -164,7 +171,11 @@ def run(staged: bool, force: bool):
     skill_dir = root / ".indexer" / "skills"
     skill_dir.mkdir(parents=True, exist_ok=True)
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)), trim_blocks=True, lstrip_blocks=True)
-    skill_content = env.get_template("skill.md.j2").render(wiki_dir=cfg.wiki_dir)
+    skill_pages = [
+        {"label": e.path.split("/")[-1].replace(".md", ""), "path": e.path, "covers": e.covers}
+        for e in index_entries
+    ]
+    skill_content = env.get_template("skill.md.j2").render(wiki_dir=cfg.wiki_dir, pages=skill_pages)
     (skill_dir / "codebase.md").write_text(skill_content)
 
     # Update manifest
