@@ -1,8 +1,0 @@
-Metadata-Version: 2.4
-Name: kiwiskil
-Version: 0.1.0
-Requires-Python: >=3.11
-Requires-Dist: click>=8.1
-Requires-Dist: litellm>=1.35
-Requires-Dist: jinja2>=3.1
-Requires-Dist: tomli-w>=1.0
