@@ -4,36 +4,68 @@ import json, os
 from indexer.ast_parser import ASTNode
 from indexer.config import Config
 
+_ANTHROPIC_MODELS = {"claude", "anthropic"}
+
+
+def _is_anthropic(cfg: Config) -> bool:
+    return any(cfg.provider.startswith(p) for p in _ANTHROPIC_MODELS)
+
 
 def _resolve_api_key(cfg: Config) -> str | None:
     """
     api_key_env can be either:
     - an env var name (e.g. "GROQ_API_KEY") -> look it up from environment
     - an actual key value (e.g. "gsk_...") -> use it directly
+    - empty string "" -> no key (use Claude Code session auth)
     """
     value = cfg.api_key_env
-    # If it contains lowercase letters or special chars typical of keys, treat as direct key
+    if not value:
+        return None
+    # If it looks like an actual key (has lowercase/mixed case), use directly
     if " " not in value and not value.isupper() and not value.replace("_", "").isupper():
         return value
     return os.environ.get(value)
 
 
+def _anthropic_completion(model: str, system: str, user: str) -> str:
+    """
+    Call Anthropic SDK directly — picks up Claude Code session auth automatically.
+    No API key needed when running inside Claude Code.
+    """
+    import anthropic
+
+    # Strip "anthropic/" prefix if present — SDK uses bare model names
+    bare_model = model.removeprefix("anthropic/")
+
+    client = anthropic.Anthropic()
+    response = client.messages.create(
+        model=bare_model,
+        max_tokens=1024,
+        system=system,
+        messages=[{"role": "user", "content": user}],
+    )
+    return response.content[0].text
+
+
 def describe_nodes(nodes: list[ASTNode], cfg: Config) -> dict[str, str]:
     """
-    Send a batch of ASTNodes to LiteLLM.
-    Returns dict mapping node.id -> one-line description string (max 12 words).
-    Returns empty descriptions (node.id -> "") on any API error.
-    """
-    import litellm
+    Describe a batch of ASTNodes via LLM.
+    Returns dict mapping node.id -> one-line description (max 12 words).
+    Falls back to empty strings on any error.
 
+    Uses Anthropic SDK directly (Claude Code session auth) when:
+    - provider starts with "anthropic/" or "claude"
+    - api_key_env is empty
+    """
     api_key = _resolve_api_key(cfg)
+    use_sdk = _is_anthropic(cfg) and api_key is None
 
     prompt_items = [
         {
             "id": n.id,
             "type": n.type,
             "docstring": n.docstring or "",
-            "calls": n.calls[:10],  # cap to avoid token bloat
+            "calls": n.calls[:10],
         }
         for n in nodes
     ]
@@ -45,21 +77,25 @@ def describe_nodes(nodes: list[ASTNode], cfg: Config) -> dict[str, str]:
         "Be factual and structural — no opinions, no guidance. "
         "Response must be valid JSON only, no markdown fences."
     )
+    user = json.dumps(prompt_items)
 
     try:
-        response = litellm.completion(
-            model=cfg.provider,
-            api_key=api_key,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": json.dumps(prompt_items)},
-            ],
-        )
-        raw = response.choices[0].message.content
-        # Strip markdown fences if model wrapped the JSON
+        if use_sdk:
+            raw = _anthropic_completion(cfg.provider, system, user)
+        else:
+            import litellm
+            response = litellm.completion(
+                model=cfg.provider,
+                api_key=api_key,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user},
+                ],
+            )
+            raw = response.choices[0].message.content
+
         raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
         result = json.loads(raw)
-        # Ensure all node IDs are present in result (fill missing with "")
         return {n.id: result.get(n.id, "") for n in nodes}
     except Exception as e:
         if isinstance(e, (TypeError, AttributeError, ImportError, NameError)):
@@ -69,34 +105,34 @@ def describe_nodes(nodes: list[ASTNode], cfg: Config) -> dict[str, str]:
 
 def synthesize_commit_message(changed_files: list[str], descriptions: dict[str, str], cfg: Config) -> str:
     """
-    Given changed files and their symbol descriptions, return a one-line commit message (max 72 chars).
-    Returns empty string on any API error.
+    Generate a one-line commit message from changed files and symbol descriptions.
+    Returns empty string on any error.
     """
-    import litellm
-
     api_key = _resolve_api_key(cfg)
+    use_sdk = _is_anthropic(cfg) and api_key is None
 
-    summary = {
-        "changed_files": changed_files,
-        "symbols": descriptions,
-    }
+    system = (
+        "Write a single git commit message (max 72 chars) summarising the code changes. "
+        "No conventional commit prefix. No markdown. Just the message text."
+    )
+    user = json.dumps({"changed_files": changed_files, "symbols": descriptions})
 
     try:
-        response = litellm.completion(
-            model=cfg.provider,
-            api_key=api_key,
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "Write a single git commit message (max 72 chars) summarising the code changes. "
-                        "No conventional commit prefix. No markdown. Just the message text."
-                    ),
-                },
-                {"role": "user", "content": json.dumps(summary)},
-            ],
-        )
-        return response.choices[0].message.content.strip()[:72]
+        if use_sdk:
+            raw = _anthropic_completion(cfg.provider, system, user)
+        else:
+            import litellm
+            response = litellm.completion(
+                model=cfg.provider,
+                api_key=api_key,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user},
+                ],
+            )
+            raw = response.choices[0].message.content
+
+        return raw.strip()[:72]
     except Exception as e:
         if isinstance(e, (TypeError, AttributeError, ImportError, NameError)):
             raise
