@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" font-family="'Segoe UI', system-ui, sans-serif">
+
+  <!-- Background -->
+  <rect width="600" height="600" fill="#fafaf7" rx="16"/>
+
+  <!-- Title -->
+  <text x="300" y="42" text-anchor="middle" font-size="18" font-weight="700" fill="#2d2d2d" letter-spacing="1">how kiwiskil works</text>
+
+  <!-- Spoke lines -->
+  <!-- Top: AST Parse -->
+  <line x1="300" y1="210" x2="300" y2="130" stroke="#c8d9c0" stroke-width="2" stroke-dasharray="5,4"/>
+  <!-- Right: Wiki Pages -->
+  <line x1="390" y1="270" x2="470" y2="230" stroke="#c8d9c0" stroke-width="2" stroke-dasharray="5,4"/>
+  <!-- Bottom: Git Hook -->
+  <line x1="345" y1="345" x2="420" y2="430" stroke="#c8d9c0" stroke-width="2" stroke-dasharray="5,4"/>
+  <!-- Left: Skill File -->
+  <line x1="210" y1="270" x2="130" y2="230" stroke="#c8d9c0" stroke-width="2" stroke-dasharray="5,4"/>
+  <!-- Bottom-left: Agent -->
+  <line x1="255" y1="345" x2="180" y2="430" stroke="#c8d9c0" stroke-width="2" stroke-dasharray="5,4"/>
+
+  <!-- ── Kiwi cross-section centre ── -->
+
+  <!-- Outer brown skin -->
+  <circle cx="300" cy="288" r="88" fill="#7a4f2e"/>
+  <!-- Inner skin highlight -->
+  <circle cx="300" cy="288" r="80" fill="#9c6b3c"/>
+  <!-- Green flesh -->
+  <circle cx="300" cy="288" r="72" fill="#5a8a45"/>
+  <!-- Lighter green mid -->
+  <circle cx="300" cy="288" r="58" fill="#74a85c"/>
+  <!-- White/cream core -->
+  <circle cx="300" cy="288" r="28" fill="#f0ede4"/>
+  <!-- Core detail -->
+  <circle cx="300" cy="288" r="20" fill="#e8e2d4"/>
+  <!-- Core centre -->
+  <circle cx="300" cy="288" r="8" fill="#d4cdbf"/>
+
+  <!-- Seeds (8 arranged radially) -->
+  <!-- seed positions on green flesh ring, radius ~48 from centre -->
+  <ellipse cx="300" cy="242" rx="5" ry="8" fill="#2d1f0e" transform="rotate(0 300 288)"/>
+  <ellipse cx="300" cy="242" rx="5" ry="8" fill="#2d1f0e" transform="rotate(45 300 288)"/>
+  <ellipse cx="300" cy="242" rx="5" ry="8" fill="#2d1f0e" transform="rotate(90 300 288)"/>
+  <ellipse cx="300" cy="242" rx="5" ry="8" fill="#2d1f0e" transform="rotate(135 300 288)"/>
+  <ellipse cx="300" cy="242" rx="5" ry="8" fill="#2d1f0e" transform="rotate(180 300 288)"/>
+  <ellipse cx="300" cy="242" rx="5" ry="8" fill="#2d1f0e" transform="rotate(225 300 288)"/>
+  <ellipse cx="300" cy="242" rx="5" ry="8" fill="#2d1f0e" transform="rotate(270 300 288)"/>
+  <ellipse cx="300" cy="242" rx="5" ry="8" fill="#2d1f0e" transform="rotate(315 300 288)"/>
+
+  <!-- Flesh line rays (like a real kiwi cross-section) -->
+  <line x1="300" y1="288" x2="300" y2="220" stroke="#4a7833" stroke-width="1" opacity="0.5"/>
+  <line x1="300" y1="288" x2="354" y2="242" stroke="#4a7833" stroke-width="1" opacity="0.5" transform="rotate(45 300 288)"/>
+  <line x1="300" y1="288" x2="354" y2="242" stroke="#4a7833" stroke-width="1" opacity="0.5" transform="rotate(90 300 288)"/>
+  <line x1="300" y1="288" x2="354" y2="242" stroke="#4a7833" stroke-width="1" opacity="0.5" transform="rotate(135 300 288)"/>
+  <line x1="300" y1="288" x2="354" y2="242" stroke="#4a7833" stroke-width="1" opacity="0.5" transform="rotate(180 300 288)"/>
+  <line x1="300" y1="288" x2="354" y2="242" stroke="#4a7833" stroke-width="1" opacity="0.5" transform="rotate(225 300 288)"/>
+  <line x1="300" y1="288" x2="354" y2="242" stroke="#4a7833" stroke-width="1" opacity="0.5" transform="rotate(270 300 288)"/>
+  <line x1="300" y1="288" x2="354" y2="242" stroke="#4a7833" stroke-width="1" opacity="0.5" transform="rotate(315 300 288)"/>
+
+  <!-- Centre label -->
+  <text x="300" y="284" text-anchor="middle" font-size="11" font-weight="700" fill="#2d1f0e">kiwiskil</text>
+  <text x="300" y="298" text-anchor="middle" font-size="9" fill="#4a3520">indexer</text>
+
+  <!-- ── Node: AST Parse (top) ── -->
+  <rect x="222" y="68" width="156" height="54" rx="12" fill="#4a7c59" />
+  <rect x="223" y="69" width="154" height="52" rx="11" fill="#5a9169" opacity="0.3"/>
+  <text x="300" y="91" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">AST Parse</text>
+  <text x="300" y="109" text-anchor="middle" font-size="10" fill="#c8e6d0">Python · JS · TS · JSX</text>
+
+  <!-- ── Node: Wiki Pages (right) ── -->
+  <rect x="450" y="192" width="120" height="72" rx="12" fill="#5c3d1e"/>
+  <text x="510" y="218" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Wiki Pages</text>
+  <text x="510" y="234" text-anchor="middle" font-size="10" fill="#dfc9a8">symbols · calls</text>
+  <text x="510" y="250" text-anchor="middle" font-size="10" fill="#dfc9a8">relationships</text>
+
+  <!-- ── Node: Git Hook (bottom-right) ── -->
+  <rect x="388" y="420" width="130" height="60" rx="12" fill="#3d6b4f"/>
+  <text x="453" y="446" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Git Hook</text>
+  <text x="453" y="463" text-anchor="middle" font-size="10" fill="#b8ddc8">auto-sync on commit</text>
+
+  <!-- ── Node: Skill File (left) ── -->
+  <rect x="30" y="192" width="120" height="72" rx="12" fill="#5c3d1e"/>
+  <text x="90" y="218" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Skill File</text>
+  <text x="90" y="234" text-anchor="middle" font-size="10" fill="#dfc9a8">agent navigation</text>
+  <text x="90" y="250" text-anchor="middle" font-size="10" fill="#dfc9a8">+ constraints</text>
+
+  <!-- ── Node: LLM Agent (bottom-left) ── -->
+  <rect x="82" y="420" width="130" height="60" rx="12" fill="#3d6b4f"/>
+  <text x="147" y="446" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">LLM Agent</text>
+  <text x="147" y="463" text-anchor="middle" font-size="10" fill="#b8ddc8">Claude · GPT · Ollama</text>
+
+  <!-- Footer -->
+  <text x="300" y="572" text-anchor="middle" font-size="10" fill="#aaa">no cloud · plain markdown · checked into git</text>
+
+</svg>

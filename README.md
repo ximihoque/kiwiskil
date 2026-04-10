@@ -1,11 +1,30 @@
-# kiwiskil
+<p align="center">
+  <img src="assets/logo.svg" width="100" alt="kiwiskil logo"/>
+</p>
 
-[![PyPI version](https://img.shields.io/pypi/v/kiwiskil.svg)](https://pypi.org/project/kiwiskil/)
-[![Python versions](https://img.shields.io/pypi/pyversions/kiwiskil.svg)](https://pypi.org/project/kiwiskil/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PyPI downloads](https://img.shields.io/pypi/dm/kiwiskil.svg)](https://pypi.org/project/kiwiskil/)
+<h1 align="center">kiwiskil</h1>
 
-> Chat with your codebase using any LLM.
+<p align="center">
+  <strong>Your codebase, understood by any LLM.</strong><br/>
+  Generate a checked-in wiki and skill files from any repo — no cloud, no lock-in.
+</p>
+
+<p align="center">
+  <a href="https://pypi.org/project/kiwiskil/"><img src="https://img.shields.io/pypi/v/kiwiskil.svg" alt="PyPI version"/></a>
+  <a href="https://pypi.org/project/kiwiskil/"><img src="https://img.shields.io/pypi/pyversions/kiwiskil.svg" alt="Python versions"/></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"/></a>
+  <a href="https://pypi.org/project/kiwiskil/"><img src="https://img.shields.io/pypi/dm/kiwiskil.svg" alt="PyPI downloads"/></a>
+</p>
+
+<p align="center">
+  <a href="#install">Install</a> · <a href="#quick-start">Quick start</a> · <a href="#cli">CLI</a> · <a href="#configuration">Configuration</a> · <a href="CONTRIBUTING.md">Contributing</a>
+</p>
+
+---
+
+<p align="center">
+  <img src="assets/diagram.svg" width="500" alt="kiwiskil architecture diagram"/>
+</p>
 
 kiwiskil generates a checked-in structural wiki and skill files from any codebase. It enables LLM agents to navigate code without reading source files — using a knowledge graph built from your repo and checked into git.
 
