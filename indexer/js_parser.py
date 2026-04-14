@@ -93,7 +93,9 @@ def parse_js_file(path: Path, repo_root: Path) -> list[ASTNode]:
     """Parse a JS/TS file using tree-sitter and return ASTNode list."""
     try:
         from tree_sitter import Parser
-    except ImportError:
+    except ImportError as e:
+        import warnings
+        warnings.warn(f"tree-sitter not installed, skipping {path}: {e}")
         return []
 
     suffix = path.suffix.lower()
@@ -105,7 +107,9 @@ def parse_js_file(path: Path, repo_root: Path) -> list[ASTNode]:
         source = path.read_bytes()
         parser = Parser(language)
         tree = parser.parse(source)
-    except (OSError, Exception):
+    except Exception as e:
+        import warnings
+        warnings.warn(f"Failed to parse {path}: {e}")
         return []
 
     rel_path = _rel(path, repo_root)
