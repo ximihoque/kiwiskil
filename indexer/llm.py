@@ -1,6 +1,6 @@
 # indexer/llm.py
 from __future__ import annotations
-import json, os
+import json, os, time
 from indexer.ast_parser import ASTNode
 from indexer.config import Config
 
@@ -85,6 +85,7 @@ def describe_nodes(nodes: list[ASTNode], cfg: Config) -> dict[str, str]:
     user = json.dumps(prompt_items)
 
     try:
+        # time.sleep(2)
         if use_sdk:
             raw = _anthropic_completion(cfg.provider, system, user, api_key)
         else:
@@ -99,12 +100,19 @@ def describe_nodes(nodes: list[ASTNode], cfg: Config) -> dict[str, str]:
             )
             raw = response.choices[0].message.content
 
+        # raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        # result = json.loads(raw)
+        # return {n.id: result.get(n.id, "") for n in nodes}
         raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
         result = json.loads(raw)
+        if isinstance(result, list):
+            result = {item["id"]: item.get("description", item.get("desc", "")) for item in result if isinstance(item, dict) and "id" in item}
         return {n.id: result.get(n.id, "") for n in nodes}
     except Exception as e:
         if isinstance(e, (TypeError, AttributeError, ImportError, NameError)):
             raise
+        import warnings
+        warnings.warn(f"LLM description failed: {e}")
         return {n.id: "" for n in nodes}
 
 
@@ -160,6 +168,8 @@ def describe_files(file_nodes: dict[str, list[ASTNode]], cfg: Config) -> dict[st
     except Exception as e:
         if isinstance(e, (TypeError, AttributeError, ImportError, NameError)):
             raise
+        import warnings
+        warnings.warn(f"LLM file description failed: {e}")
         return {f: "" for f in file_nodes}
 
 
@@ -238,6 +248,8 @@ def deep_enrich_page(
     except Exception as e:
         if isinstance(e, (TypeError, AttributeError, ImportError, NameError)):
             raise
+        import warnings
+        warnings.warn(f"LLM deep enrichment failed: {e}")
         return empty
 
 
@@ -295,6 +307,8 @@ def deep_enrich_index(
     except Exception as e:
         if isinstance(e, (TypeError, AttributeError, ImportError, NameError)):
             raise
+        import warnings
+        warnings.warn(f"LLM index enrichment failed: {e}")
         return empty
 
 
@@ -331,4 +345,6 @@ def synthesize_commit_message(changed_files: list[str], descriptions: dict[str, 
     except Exception as e:
         if isinstance(e, (TypeError, AttributeError, ImportError, NameError)):
             raise
+        import warnings
+        warnings.warn(f"LLM commit message synthesis failed: {e}")
         return ""
