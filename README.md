@@ -11,9 +11,10 @@
 
 <p align="center">
   <a href="https://pypi.org/project/kiwiskil/"><img src="https://img.shields.io/pypi/v/kiwiskil.svg" alt="PyPI version"/></a>
-  <a href="https://pypi.org/project/kiwiskil/"><img src="https://img.shields.io/pypi/pyversions/kiwiskil.svg" alt="Python versions"/></a>
+  <a href="https://pypi.org/project/kiwiskil/"><img src="https://img.shields.io/badge/python-%3E%3D3.11-blue" alt="Python >=3.11"/></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"/></a>
   <a href="https://pypi.org/project/kiwiskil/"><img src="https://img.shields.io/pypi/dm/kiwiskil.svg" alt="PyPI downloads"/></a>
+  <a href="https://xysq.ai"><img src="https://img.shields.io/badge/backed%20by-xysq.ai-6366f1" alt="Backed by xysq.ai"/></a>
 </p>
 
 <p align="center">
