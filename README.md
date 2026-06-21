@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>Your codebase, understood by any LLM.</strong><br/>
-  Generate a checked-in wiki and skill files from any repo — no cloud, no lock-in.
+  A ranked, checked-in map any AI agent reads instead of crawling your source — no cloud, no lock-in.
 </p>
 
 <p align="center">
@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="#install">Install</a> · <a href="#quick-start">Quick start</a> · <a href="#claudemd-snippet">CLAUDE.md snippet</a> · <a href="#cli">CLI</a> · <a href="#loading-the-skill">Loading the skill</a> · <a href="#configuration">Configuration</a> · <a href="CONTRIBUTING.md">Contributing</a>
+  <a href="#why-kiwiskil">Why</a> · <a href="#install">Install</a> · <a href="#quick-start">Quick start</a> · <a href="#what-you-get">What you get</a> · <a href="#cli">CLI</a> · <a href="#configuration">Configuration</a> · <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
 ---
@@ -27,21 +27,20 @@
   <img src="assets/diagram.svg" width="500" alt="kiwiskil architecture diagram"/>
 </p>
 
-kiwiskil generates a checked-in structural wiki and skill files from any codebase. It enables LLM agents to navigate code without reading source files — using a knowledge graph built from your repo and checked into git.
+**kiwiskil turns any codebase into a static, checked-in map that any AI agent can navigate and debug — fast, and with a fraction of the tokens of reading source.** It parses your code into a call graph, ranks what matters with PageRank, and writes it all to plain markdown in your repo. No cloud service, no vector database, no running server, no lock-in — the map is just files an agent reads directly, and a git hook keeps it current.
 
 ---
 
-## How it works
+## Why kiwiskil
 
-1. **AST parsing** extracts symbols, imports, and call graphs from your source files (deterministic, free) — Python, JS/TS, Go, Java, Ruby, and Rust
-2. **An LLM** adds one-line descriptions and a system overview — via any LiteLLM provider, or your logged-in `claude` CLI with **no API key** ([details](#no-api-key-use-your-logged-in-claude))
-3. **A density-based grouper** organises files into wiki pages by logical density, not directory structure
-4. **Relationships and impact are rendered inline** — every page shows each symbol's callers, callees, and an "editing this affects…" blast radius (precomputed, deterministic), so an agent can trace and debug without reading source
-5. **A ranked repo map** (PageRank over the call graph, fit to a token budget) leads `INDEX.md` and the skill file with the most load-bearing symbols first
-6. **A pre-commit hook** keeps the wiki in sync — every commit includes updated wiki pages atomically
-7. **A skill file** is generated at `.indexer/skills/codebase.md`, and `init` writes both `CLAUDE.md` and `AGENTS.md` navigation snippets so any LLM agent or assistant can use the map
+Code-context tools tend to be either **dumb committed blobs** (whole-repo dumps) or **smart graphs behind a service** (vector/graph DBs you have to run). kiwiskil is the missing third thing — **a smart, ranked, relational map that's just committed files.**
 
-The wiki is plain markdown checked into your repo, with [OKF](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)-style YAML frontmatter on every page. No cloud service, no search index, no running server, no lock-in — the map is files an agent reads directly.
+- 🗺️ **PageRank repo map** — the index leads with your most *load-bearing* symbols (ranked over the call graph, trimmed to a token budget), so an agent grasps the spine of your system in ~1k tokens instead of crawling files.
+- 💥 **Impact inline** — every symbol lists its callers, its calls, and an *"editing this affects…"* blast radius. Assess change impact without opening source.
+- 📦 **OKF-native** — pages are [Open Knowledge Format](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing) markdown (YAML frontmatter + body), portable and readable by any OKF-aware tool — not a bespoke format. The manifest also carries [SCIP](https://github.com/sourcegraph/scip) symbol descriptors for IDE interop.
+- 🔑 **Zero API key for Claude users** — signed in to the [`claude` CLI](https://claude.com/claude-code)? Just `kiwiskil run`. (Or any LiteLLM provider: OpenAI, Gemini, Ollama, local.)
+- 🌐 **Six languages, no build** — Python, JS/TS, Go, Java, Ruby, Rust via tree-sitter.
+- ♻️ **Always fresh** — a git hook re-indexes what changed; `--smart` repairs or fills anything broken; `--smart --dry-run` is a CI gate that fails the build if the map goes stale.
 
 ---
 
@@ -51,272 +50,64 @@ The wiki is plain markdown checked into your repo, with [OKF](https://cloud.goog
 pip install kiwiskil
 ```
 
----
-
 ## Quick start
 
 ```bash
-# In any git repo
-kiwiskil init       # creates .indexer.toml, installs pre-commit hook, writes CLAUDE.md + AGENTS.md
-kiwiskil run        # generates wiki/ and .indexer/skills/codebase.md
+# in any git repo
+kiwiskil init       # config + git hook + CLAUDE.md / AGENTS.md
+kiwiskil run        # build the map → wiki/ + .indexer/skills/codebase.md
 ```
 
-On every subsequent commit, the pre-commit hook runs `kiwiskil run --staged` automatically — only changed files are re-indexed.
+That's it. Every commit re-indexes what changed automatically. No API key needed if you're signed in to the [`claude` CLI](https://claude.com/claude-code).
 
----
+## What you get
 
-## CLAUDE.md / AGENTS.md snippet
+- **`wiki/INDEX.md`** — a system overview, key flows, the **PageRank repo map** (most load-bearing symbols first), and the core abstractions.
+- **`wiki/<group>.md`** — per module: symbols with one-line descriptions, and each symbol's **callers, calls, and blast radius** ("editing this affects…").
+- **`.indexer/skills/codebase.md`** — a skill file that teaches any agent to navigate via the map instead of reading source.
+- **`.indexer/manifest.json`** — every file → its wiki page and component IDs (with SCIP descriptors).
 
-`kiwiskil init` writes this navigation snippet to **both** `CLAUDE.md` (for Claude Code) and `AGENTS.md` (the cross-tool convention read by Cursor, Codex, Gemini CLI, Copilot, and others) automatically. `kiwiskil run --smart` also restores either file if it goes missing. If you prefer to add it manually, paste it into the file in your repo root:
-
-```markdown
-## Codebase Navigation
-
-This repo is indexed with kiwiskil. Before reading any source file or answering any code question:
-
-1. Load `.indexer/skills/codebase.md` as a skill — it contains the full navigation workflow.
-2. Read `wiki/INDEX.md` for the system overview and module map.
-3. Match the question to a wiki page, look up symbols there, and only read source when you know the exact file and line range.
-
-Do not read source files speculatively. The wiki gives you structure and relationships in a fraction of the tokens.
-
-- Wiki pages: `wiki/` — grouped by logical density, not directory structure
-- Manifest: `.indexer/manifest.json` — maps every file to its wiki page and component IDs
-- Component IDs: `relative/path.py::ClassName.method_name`
-```
-
-The snippet does three things:
-- Tells Claude to load the skill **before** doing anything — this is what makes the navigation workflow kick in
-- Points to `wiki/INDEX.md` as the first read, not random source files
-- Sets the rule: wiki first, source only when you know exactly where to look
-
----
+All plain markdown, [OKF](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)-framed, checked into your repo. See this repo's own [`wiki/`](wiki/) for a live example.
 
 ## CLI
 
 ```bash
-kiwiskil init                    # set up config, hook, CLAUDE.md + AGENTS.md
-kiwiskil run                     # smart incremental + deep enrichment (default)
-kiwiskil run --skip-deep         # skip narrative/flows/constraints enrichment (faster)
-kiwiskil run --force             # force full re-index of all files
-kiwiskil run --staged            # incremental on staged files only (used by hook)
-kiwiskil run --smart             # verify generated artifacts and repair only what's broken
-kiwiskil run --smart --dry-run   # report drift without fixing
-kiwiskil status                  # show last indexed commit, stale files, stats
-kiwiskil hook install            # manually install pre-commit hook
-kiwiskil hook remove             # remove pre-commit hook
+kiwiskil run                     # incremental + deep enrichment (default)
+kiwiskil run --force             # full re-index
+kiwiskil run --skip-deep         # structural only, faster
+kiwiskil run --smart             # verify + repair/fill anything broken or missing
+kiwiskil run --smart --dry-run   # report drift only; exits non-zero → CI drift-gate
+kiwiskil status                  # last indexed commit, stale files, stats
 ```
-
-### Deep mode
-
-By default, `kiwiskil run` performs a **deep enrichment** pass after structural indexing. This uses your configured LLM to generate:
-
-- **System narrative** — a plain-English overview of what the codebase does
-- **Key request flows** — end-to-end data flows across modules
-- **Design constraints** — per-module gotchas, invariants, and non-obvious rules
-
-These appear in `wiki/INDEX.md` and in the skill file, giving agents richer context without reading source. Use `--skip-deep` to run structural-only indexing when speed matters.
-
-### Smart mode
-
-`kiwiskil run --smart` is a verify-then-repair mode for the generated artifacts themselves. It checks for drift that the default incremental mode doesn't catch:
-
-- Missing or deleted wiki pages
-- Orphan wiki pages (no manifest entry points to them)
-- Missing `.indexer/skills/codebase.md` or `wiki/INDEX.md`
-- Dangling manifest entries for files that no longer exist
-- Untracked source files that were never indexed
-- Missing CLAUDE.md or AGENTS.md snippet, `.gitignore` cache entry, or pre-commit hook
-- Wiki pages missing deep-mode sections (when deep mode is enabled)
-
-Smart mode also **fills** missing pieces, not just drift: on a fresh repo with no index yet, `kiwiskil run --smart` performs a full initial index of every tracked source file (it only bails when there are genuinely no indexable files). Never-indexed tracked files are picked up and indexed in the same pass.
-
-Smart mode only re-LLMs the groups it has to. Pass `--dry-run` to see what's drifted (including "would do a full initial index of N files") without changing anything. With `--dry-run`, the command **exits non-zero when drift is found** and zero when clean — making it a drop-in CI drift-gate (see `.github/workflows/kiwiskil.yml`). The dry-run is deterministic and needs no LLM / API key.
-
----
-
-## Output
-
-### `wiki/INDEX.md`
-Top-level map of the entire codebase — which wiki page covers which files, entry points for each group, system overview, and key request flows (when deep mode is enabled). It also carries:
-- **Repo Map** — symbols ranked by importance (PageRank over the call graph), fit to a token budget (`map_tokens`), most load-bearing first — read these to orient
-- **Core abstractions** — the highest-connectivity symbols (most callers + callees)
-
-Every page is [OKF](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)-framed: YAML frontmatter with `type`, `title`, `description`, `tags`, `timestamp`, and `resource`; `INDEX.md` declares `okf_version`.
-
-### `wiki/<group>.md`
-One page per logical folder cluster. Each page contains:
-- **Modules** — files covered
-- **Key Symbols** — functions, classes, methods with one-line descriptions
-- **Symbol Relationships** — per symbol: its **Callers**, its **Calls**, and **Editing this affects** (the transitive blast radius) — so you can trace and assess impact without reading source
-- **Relationships** — what this group calls, what calls it, what it imports
-- **Entry Points** — symbols with no callers (architectural roots)
-- **Data Flows** — end-to-end flows through this module *(deep mode)*
-- **Design Constraints** — invariants and non-obvious rules to respect *(deep mode)*
-
-### `.indexer/skills/codebase.md`
-A skill file that teaches any LLM agent how to navigate your codebase. The skill file includes:
-
-- Codebase stats (symbol count, file count, index date, commit)
-- System overview and key request flows
-- A ranked **Repo Map** (most load-bearing symbols first, fit to a token budget)
-- Wiki page index with entry points
-- Critical constraints extracted per module
-- Step-by-step navigation workflow for agents
-- Component ID format reference and manifest lookup instructions
-
----
-
-## Loading the skill
-
-The skill file lives at `.indexer/skills/codebase.md` after you run `kiwiskil run`. Load it into your agent once — it activates automatically on any codebase question.
-
-### Claude Code
-
-```bash
-# Global — available in every project
-mkdir -p ~/.claude/skills/codebase
-cp .indexer/skills/codebase.md ~/.claude/skills/codebase/SKILL.md
-
-# Project-local — available in this repo only
-mkdir -p .claude/skills/codebase
-cp .indexer/skills/codebase.md .claude/skills/codebase/SKILL.md
-```
-
-Or reference it directly in `CLAUDE.md` (already done by `kiwiskil init`):
-
-```markdown
-## Codebase Navigation
-Load `.indexer/skills/codebase.md` as a skill before reading source files.
-```
-
-### Cursor
-
-Add the skill content to your `.cursor/rules` file or a `*.mdc` rule file:
-
-```bash
-# Append the skill as a project rule
-cat .indexer/skills/codebase.md >> .cursor/rules/codebase.mdc
-```
-
-Or in Cursor Settings → Rules → Project Rules, paste the contents of `.indexer/skills/codebase.md`.
-
-### Windsurf
-
-Add the skill to your project's Windsurf rules file:
-
-```bash
-# Append to existing rules, or create the file
-cat .indexer/skills/codebase.md >> .windsurfrules
-```
-
-Windsurf loads `.windsurfrules` automatically for every conversation in the project.
-
-### GitHub Copilot (VS Code)
-
-Add the skill as a custom instruction file:
-
-```bash
-mkdir -p .github
-cat .indexer/skills/codebase.md >> .github/copilot-instructions.md
-```
-
-Copilot picks up `.github/copilot-instructions.md` automatically for workspace-scoped chat.
-
-### Zed
-
-Paste the skill content into your project's `.zed/assistant_instructions.md`:
-
-```bash
-mkdir -p .zed
-cat .indexer/skills/codebase.md >> .zed/assistant_instructions.md
-```
-
-### Any other agent / MCP client
-
-The skill file is plain markdown. Load it into your agent's context however it supports custom instructions — system prompt, context file, instruction file, or rules file. The skill activates on any codebase navigation question automatically.
-
----
-
-### Keeping the skill in sync
-
-The pre-commit hook regenerates `.indexer/skills/codebase.md` on every commit. If you copy the file to a global location, re-copy it after each index run:
-
-```bash
-kiwiskil run && cp .indexer/skills/codebase.md ~/.claude/skills/codebase/SKILL.md
-```
-
-For project-local paths (`.claude/skills/codebase/SKILL.md`, `.cursor/rules/`, `.windsurfrules`), the file updates in-place automatically — no extra step needed.
-
----
 
 ## Configuration
 
-`.indexer.toml` is created by `kiwiskil init` and checked into the repo:
+`.indexer.toml` (created by `init`):
 
 ```toml
 [llm]
-provider = "anthropic/claude-sonnet-4-6"  # any LiteLLM-compatible model string
-api_key_env = "ANTHROPIC_API_KEY"         # env var name, not the key itself; leave unset to use the logged-in `claude` CLI
+provider = "anthropic/claude-sonnet-4-6"  # any LiteLLM model; leave api_key_env unset to use the claude CLI
+api_key_env = "ANTHROPIC_API_KEY"
 
 [indexer]
-wiki_dir = "wiki"
-ignore = ["node_modules", ".venv", "dist", "build", "__pycache__", "*.test.*"]
-max_tokens_per_batch = 8000
-merge_threshold = 2       # min files under a folder before it becomes its own wiki page
-map_tokens = 1024         # token budget for the ranked Repo Map spine in INDEX/skill
+map_tokens = 1024          # token budget for the ranked repo map
+merge_threshold = 2        # min files under a folder before it gets its own page
 
 [hooks]
 pre_commit = true
-synthesize_commit_message = true
-deep = true           # set false to skip --deep on commits (faster, structural only)
+deep = true                # narrative / flows / constraints (set false for speed)
 ```
 
-Any LiteLLM-compatible provider works: OpenAI, Anthropic, Gemini, Ollama, local models.
+**No API key?** If the `claude` CLI is installed and signed in, kiwiskil uses your session — zero config. Otherwise any LiteLLM provider works (OpenAI, Gemini, Ollama, local). With no LLM at all, you still get the full *structural* map (symbols, call graph, repo map, blast radius); only the written descriptions are skipped.
 
-### No API key? Use your logged-in Claude
+## Languages
 
-If you have the [`claude` CLI](https://claude.com/claude-code) installed and signed in (Claude Code / a Claude subscription), kiwiskil works with **no API key at all** — just run `kiwiskil run`. When no key is found and the provider is Anthropic, kiwiskil shells out to your authenticated `claude` CLI for the enrichment calls. Credential priority:
+Python, JavaScript/TypeScript, Go, Java, Ruby, Rust — via tree-sitter, no build step. A file whose grammar isn't installed is skipped gracefully, never a crash.
 
-1. An explicit API key (`api_key_env` / a known env var) → used directly.
-2. Otherwise, Anthropic provider + `claude` on your `PATH` → your logged-in session (zero config, no key).
-3. Neither → kiwiskil still emits a **structural** wiki (symbols, call graph, repo map, blast radius); only the LLM-written descriptions and the system-overview prose are skipped.
+## Loading the skill
 
-High-volume symbol descriptions use a fast model (Haiku); the few deep-mode prose calls use your configured model.
-
----
-
-## Commit message synthesis
-
-When running as a pre-commit hook, kiwiskil synthesises a commit message from the code changes and prints it to stdout. You can use it, edit it, or ignore it — your choice.
-
----
-
-## Design principles
-
-- **Structural facts only** — wiki pages contain symbols, relationships, and entry points. No prose summaries, no architectural opinions. The client LLM draws its own conclusions.
-- **Checked in, not served** — the wiki is plain markdown in your repo. It travels with your code, is tracked by git, and is readable by humans and agents alike.
-- **Incremental by default** — git diff + content hash manifest means only changed files are re-processed on each commit.
-- **Provider-agnostic** — LiteLLM means you can use any model, local or cloud, without changing the tool.
-
----
-
-## Supported languages
-
-| Language | Status | Parser |
-|----------|--------|--------|
-| Python | Supported | stdlib `ast` |
-| JavaScript (`.js`, `.jsx`, `.mjs`, `.cjs`) | Supported | tree-sitter |
-| TypeScript (`.ts`, `.tsx`) | Supported | tree-sitter |
-| Go (`.go`) | Supported | tree-sitter |
-| Java (`.java`) | Supported | tree-sitter |
-| Ruby (`.rb`) | Supported | tree-sitter |
-| Rust (`.rs`) | Supported | tree-sitter |
-
-Coverage varies by language (e.g. Go methods are emitted by their own name rather than attributed to a receiver type). A file whose grammar isn't installed degrades gracefully — it's skipped with a warning, never a crash.
-
----
+Point your agent at `.indexer/skills/codebase.md` — it's plain markdown that activates on any codebase question. `kiwiskil init` already wires up `CLAUDE.md` and `AGENTS.md`; for other tools, drop the file into your rules/instructions path (`.cursor/rules/`, `.windsurfrules`, `.github/copilot-instructions.md`, …).
 
 ## License
 
-MIT
+MIT · backed by [xysq.ai](https://xysq.ai)
