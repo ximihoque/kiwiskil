@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" width="1000" height="400" font-family="'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif">
+
+  <!-- Background: near-black, matches banner + features -->
+  <rect width="1000" height="400" fill="#0a0a0a"/>
+
+  <defs>
+    <linearGradient id="stage" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#161616"/>
+      <stop offset="100%" stop-color="#101010"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3d6b33"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="500" y="58" text-anchor="middle" font-size="20" font-weight="700" fill="#ffffff" letter-spacing="0.3">How kiwiskil works</text>
+
+  <!-- ── 4-stage left-to-right pipeline ──
+       4 stages, w=196, gap≈28, vertical centre ~200; margins 40 -->
+
+  <!-- Connector arrows (drawn first, behind cards) -->
+  <line x1="236" y1="200" x2="268" y2="200" stroke="#3d6b33" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="460" y1="200" x2="492" y2="200" stroke="#3d6b33" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="684" y1="200" x2="716" y2="200" stroke="#3d6b33" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Stage 1: Your code -->
+  <g transform="translate(40,128)">
+    <rect width="196" height="144" rx="14" fill="url(#stage)" stroke="#262626" stroke-width="1"/>
+    <text x="98" y="46" text-anchor="middle" font-size="26">📂</text>
+    <text x="98" y="80" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">Your code</text>
+    <text x="98" y="106" text-anchor="middle" font-size="12.5" fill="#9a9a9a">Py · JS/TS · Go</text>
+    <text x="98" y="124" text-anchor="middle" font-size="12.5" fill="#9a9a9a">Java · Ruby · Rust</text>
+  </g>
+
+  <!-- Stage 2: Parse + rank -->
+  <g transform="translate(264,128)">
+    <rect width="196" height="144" rx="14" fill="url(#stage)" stroke="#262626" stroke-width="1"/>
+    <text x="98" y="46" text-anchor="middle" font-size="26">🧮</text>
+    <text x="98" y="80" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">Parse &amp; rank</text>
+    <text x="98" y="106" text-anchor="middle" font-size="12.5" fill="#9a9a9a">tree-sitter call graph</text>
+    <text x="98" y="124" text-anchor="middle" font-size="12.5" fill="#9a9a9a">+ PageRank + LLM</text>
+  </g>
+
+  <!-- Stage 3: Markdown map -->
+  <g transform="translate(488,128)">
+    <rect width="196" height="144" rx="14" fill="url(#stage)" stroke="#262626" stroke-width="1"/>
+    <text x="98" y="46" text-anchor="middle" font-size="26">🗺️</text>
+    <text x="98" y="80" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">Markdown map</text>
+    <text x="98" y="106" text-anchor="middle" font-size="12.5" fill="#9a9a9a">OKF wiki + skill file</text>
+    <text x="98" y="124" text-anchor="middle" font-size="12.5" fill="#9a9a9a">committed to git</text>
+  </g>
+
+  <!-- Stage 4: Any agent reads it -->
+  <g transform="translate(712,128)">
+    <rect width="196" height="144" rx="14" fill="url(#stage)" stroke="#262626" stroke-width="1"/>
+    <text x="98" y="46" text-anchor="middle" font-size="26">🤖</text>
+    <text x="98" y="80" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">Any agent</text>
+    <text x="98" y="106" text-anchor="middle" font-size="12.5" fill="#9a9a9a">Claude · Cursor ·</text>
+    <text x="98" y="124" text-anchor="middle" font-size="12.5" fill="#9a9a9a">Codex · Copilot …</text>
+  </g>
+
+  <!-- Footer note: the loop that keeps it fresh -->
+  <text x="500" y="332" text-anchor="middle" font-size="13" fill="#7a7a7a">↻  a git pre-commit hook re-indexes what changed on every commit — the map never goes stale</text>
+
+</svg>

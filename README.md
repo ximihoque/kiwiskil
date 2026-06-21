@@ -20,10 +20,6 @@
 
 ---
 
-<p align="center">
-  <img src="assets/diagram.svg" width="500" alt="kiwiskil architecture diagram"/>
-</p>
-
 **kiwiskil turns any codebase into a static, checked-in map that any AI agent can navigate and debug — fast, and with a fraction of the tokens of reading source.** It parses your code into a call graph, ranks what matters with PageRank, and writes it all to plain markdown in your repo. No cloud service, no vector database, no running server, no lock-in — the map is just files an agent reads directly, and a git hook keeps it current.
 
 ---
@@ -37,6 +33,14 @@ Code-context tools tend to be either **dumb committed blobs** (whole-repo dumps)
 </p>
 
 Also: [OKF](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)-native markdown (+ [SCIP](https://github.com/sourcegraph/scip) IDs for IDE interop), and six languages — Python, JS/TS, Go, Java, Ruby, Rust — via tree-sitter, no build step.
+
+---
+
+## How it works
+
+<p align="center">
+  <img src="assets/how-it-works.svg" width="720" alt="Your code → parse & rank → markdown map (committed to git) → any agent reads it"/>
+</p>
 
 ---
 
