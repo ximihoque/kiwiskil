@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" width="1000" height="400" font-family="'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif">
+
+  <!-- Background: near-black, matches banner -->
+  <rect width="1000" height="400" fill="#0a0a0a"/>
+
+  <defs>
+    <!-- card surface gradient: subtle lift off the black -->
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#161616"/>
+      <stop offset="100%" stop-color="#101010"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ── 2×2 grid of cards ──
+       margins 40, gap 24 → card w=(1000-80-24)/2=448, h=(400-80-24)/2=148 -->
+
+  <!-- Card 1: PageRank map (top-left) -->
+  <g transform="translate(40,40)">
+    <rect width="448" height="148" rx="14" fill="url(#card)" stroke="#262626" stroke-width="1"/>
+    <text x="28" y="52" font-size="26">🗺️</text>
+    <text x="68" y="52" font-size="21" font-weight="700" fill="#ffffff">PageRank map</text>
+    <text x="28" y="88" font-size="15" fill="#9a9a9a">Leads with your most load-bearing symbols,</text>
+    <text x="28" y="110" font-size="15" fill="#9a9a9a">trimmed to a token budget — grasp the whole</text>
+    <text x="28" y="132" font-size="15" fill="#9a9a9a">system in ~1k tokens.</text>
+  </g>
+
+  <!-- Card 2: Impact inline (top-right) -->
+  <g transform="translate(512,40)">
+    <rect width="448" height="148" rx="14" fill="url(#card)" stroke="#262626" stroke-width="1"/>
+    <text x="28" y="52" font-size="26">💥</text>
+    <text x="68" y="52" font-size="21" font-weight="700" fill="#ffffff">Impact inline</text>
+    <text x="28" y="88" font-size="15" fill="#9a9a9a">Every symbol shows its callers, its calls,</text>
+    <text x="28" y="110" font-size="15" fill="#9a9a9a">and an “editing this affects…” blast radius —</text>
+    <text x="28" y="132" font-size="15" fill="#9a9a9a">assess changes without opening source.</text>
+  </g>
+
+  <!-- Card 3: Zero API key (bottom-left) -->
+  <g transform="translate(40,212)">
+    <rect width="448" height="148" rx="14" fill="url(#card)" stroke="#262626" stroke-width="1"/>
+    <text x="28" y="52" font-size="26">🔑</text>
+    <text x="68" y="52" font-size="21" font-weight="700" fill="#ffffff">Zero API key</text>
+    <text x="28" y="88" font-size="15" fill="#9a9a9a">Signed in to the Claude CLI? Just run it —</text>
+    <text x="28" y="110" font-size="15" fill="#9a9a9a">no key needed. Or bring any LiteLLM</text>
+    <text x="28" y="132" font-size="15" fill="#9a9a9a">provider: OpenAI, Gemini, Ollama, local.</text>
+  </g>
+
+  <!-- Card 4: Always fresh (bottom-right) -->
+  <g transform="translate(512,212)">
+    <rect width="448" height="148" rx="14" fill="url(#card)" stroke="#262626" stroke-width="1"/>
+    <text x="28" y="52" font-size="26">♻️</text>
+    <text x="68" y="52" font-size="21" font-weight="700" fill="#ffffff">Always fresh</text>
+    <text x="28" y="88" font-size="15" fill="#9a9a9a">A git hook re-indexes what changed;</text>
+    <text x="28" y="110" font-size="15" fill="#9a9a9a">--smart repairs or fills anything broken;</text>
+    <text x="28" y="132" font-size="15" fill="#9a9a9a">--smart --dry-run is a CI drift-gate.</text>
+  </g>
+
+</svg>

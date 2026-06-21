@@ -32,11 +32,11 @@
 
 Code-context tools tend to be either **dumb committed blobs** (whole-repo dumps) or **smart graphs behind a service** (vector/graph DBs you have to run). kiwiskil is the missing third thing — **a smart, ranked, relational map that's just committed files.**
 
-|  |  |
-|---|---|
-| 🗺️ **PageRank repo map** <br/> Leads with your most load-bearing symbols, trimmed to a token budget — an agent grasps the spine of your system in ~1k tokens. | 💥 **Impact inline** <br/> Every symbol shows its callers, its calls, and an *"editing this affects…"* blast radius. Assess changes without opening source. |
-| 📦 **OKF-native** <br/> Pages are portable [Open Knowledge Format](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing) markdown — not a bespoke format. Manifest carries [SCIP](https://github.com/sourcegraph/scip) IDs for IDE interop. | 🔑 **Zero API key** <br/> Signed in to the [`claude` CLI](https://claude.com/claude-code)? Just `kiwiskil run`. Or any LiteLLM provider — OpenAI, Gemini, Ollama, local. |
-| 🌐 **Six languages, no build** <br/> Python, JS/TS, Go, Java, Ruby, Rust via tree-sitter — pure parse, no compiler. | ♻️ **Always fresh** <br/> A git hook re-indexes what changed; `--smart` repairs or fills anything broken; `--smart --dry-run` is a CI drift-gate. |
+<p align="center">
+  <img src="assets/features.svg" width="720" alt="PageRank map · Impact inline · Zero API key · Always fresh"/>
+</p>
+
+Also: [OKF](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)-native markdown (+ [SCIP](https://github.com/sourcegraph/scip) IDs for IDE interop), and six languages — Python, JS/TS, Go, Java, Ruby, Rust — via tree-sitter, no build step.
 
 ---
 
