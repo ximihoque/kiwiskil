@@ -5,6 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "kiwiskil"
 version = "0.4.0"
+description = "Your codebase, understood by any LLM. Generate a checked-in wiki and skill files from any repo — no cloud, no lock-in."
+readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.11"
 dependencies = [
     "click>=8.1",
@@ -26,6 +29,7 @@ kiwiskil = "indexer.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
+include = ["indexer*"]   # ship only the package — never bundle tests/
 
 [tool.setuptools.package-data]
 indexer = ["templates/*.j2"]
