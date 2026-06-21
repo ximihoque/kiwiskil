@@ -64,13 +64,14 @@
   <rect x="222" y="68" width="156" height="54" rx="12" fill="#4a7c59" />
   <rect x="223" y="69" width="154" height="52" rx="11" fill="#5a9169" opacity="0.3"/>
   <text x="300" y="91" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">AST Parse</text>
-  <text x="300" y="109" text-anchor="middle" font-size="10" fill="#c8e6d0">Python · JS · TS · JSX</text>
+  <text x="300" y="109" text-anchor="middle" font-size="9" fill="#c8e6d0">Py · JS/TS · Go · Java · Ruby · Rust</text>
 
   <!-- ── Node: Wiki Pages (right) ── -->
-  <rect x="450" y="192" width="120" height="72" rx="12" fill="#5c3d1e"/>
-  <text x="510" y="218" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Wiki Pages</text>
-  <text x="510" y="234" text-anchor="middle" font-size="10" fill="#dfc9a8">symbols · calls</text>
-  <text x="510" y="250" text-anchor="middle" font-size="10" fill="#dfc9a8">relationships</text>
+  <rect x="446" y="186" width="128" height="84" rx="12" fill="#5c3d1e"/>
+  <text x="510" y="208" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Wiki Pages</text>
+  <text x="510" y="224" text-anchor="middle" font-size="9" fill="#dfc9a8">PageRank map</text>
+  <text x="510" y="238" text-anchor="middle" font-size="9" fill="#dfc9a8">blast radius</text>
+  <text x="510" y="252" text-anchor="middle" font-size="9" fill="#dfc9a8">OKF markdown</text>
 
   <!-- ── Node: Git Hook (bottom-right) ── -->
   <rect x="388" y="420" width="130" height="60" rx="12" fill="#3d6b4f"/>
@@ -86,9 +87,9 @@
   <!-- ── Node: LLM Agent (bottom-left) ── -->
   <rect x="82" y="420" width="130" height="60" rx="12" fill="#3d6b4f"/>
   <text x="147" y="446" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">LLM Agent</text>
-  <text x="147" y="463" text-anchor="middle" font-size="10" fill="#b8ddc8">Claude · GPT · Ollama</text>
+  <text x="147" y="463" text-anchor="middle" font-size="10" fill="#b8ddc8">Claude (no key) · any LLM</text>
 
   <!-- Footer -->
-  <text x="300" y="572" text-anchor="middle" font-size="10" fill="#aaa">no cloud · plain markdown · checked into git</text>
+  <text x="300" y="572" text-anchor="middle" font-size="10" fill="#aaa">a ranked map your agent reads · no cloud · plain markdown · checked into git</text>
 
 </svg>
