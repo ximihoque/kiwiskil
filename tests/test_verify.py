@@ -387,3 +387,22 @@ def test_print_report_lists_each_drift(capsys):
     assert "b.py" in out
     assert "wiki/x.md" in out
     assert "hook" in out.lower()
+
+
+def test_scan_skips_hook_check_when_check_hook_false(monkeypatch):
+    """The pre-commit hook lives in .git/hooks (never committed, absent on a
+    fresh CI checkout), so a committed-tree drift-gate must be able to skip it.
+    check_hook=False suppresses the hook_drift detection."""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        manifest = _seed_valid_state(root)
+        (root / "CLAUDE.md").write_text("# Codebase Navigation\n")
+        (root / "AGENTS.md").write_text("# Codebase Navigation\n")
+        (root / ".gitignore").write_text(".indexer/cache/\n")
+        monkeypatch.setattr("indexer.verify.all_tracked_files", lambda r: ["foo.py"])
+        monkeypatch.setattr("indexer.verify.is_git_repo", lambda r: True)
+        # No pre-commit hook on disk -> would normally flag hook_drift.
+        with_check = scan(root, Config(), manifest)
+        assert with_check.hook_drift is True
+        without_check = scan(root, Config(), manifest, check_hook=False)
+        assert without_check.hook_drift is False

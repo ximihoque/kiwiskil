@@ -6,4 +6,8 @@ dist/
 build/
 .venv/
 *.env
+.claude/
 docs/superpowers/
+
+# kiwiskil
+.indexer/cache/

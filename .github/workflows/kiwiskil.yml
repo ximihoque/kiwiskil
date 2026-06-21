@@ -47,5 +47,7 @@ jobs:
           # Present-or-absent: the dry-run never needs it. Wired for parity
           # with non-dry-run flows that would actually call the LLM.
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        # --no-hook-check: the pre-commit hook lives in .git/hooks and is never
+        # committed, so it's absent on a fresh CI checkout; skip that check here.
         run: |
-          kiwiskil run --smart --dry-run
+          kiwiskil run --smart --dry-run --no-hook-check

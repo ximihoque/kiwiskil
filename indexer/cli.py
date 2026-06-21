@@ -91,7 +91,8 @@ def init():
 @click.option("--smart", is_flag=True, help="Verify generated artifacts and repair only what's broken")
 @click.option("--dry-run", is_flag=True, help="With --smart: report drift without fixing anything")
 @click.option("--skip-deep", is_flag=True, help="Skip narrative, data flows, and design constraints (faster, fewer tokens)")
-def run(staged: bool, force: bool, smart: bool, dry_run: bool, skip_deep: bool):
+@click.option("--no-hook-check", is_flag=True, help="With --smart: skip the pre-commit hook check (for CI, where the hook isn't on a fresh checkout)")
+def run(staged: bool, force: bool, smart: bool, dry_run: bool, skip_deep: bool, no_hook_check: bool):
     """Index the codebase and generate wiki pages."""
     root = Path.cwd()
     cfg = load_config(root)
@@ -101,9 +102,11 @@ def run(staged: bool, force: bool, smart: bool, dry_run: bool, skip_deep: bool):
         raise click.UsageError("--smart is mutually exclusive with --force and --staged")
     if dry_run and not smart:
         raise click.UsageError("--dry-run can only be used with --smart")
+    if no_hook_check and not smart:
+        raise click.UsageError("--no-hook-check can only be used with --smart")
 
     if smart:
-        _run_smart(root, cfg, manifest, dry_run=dry_run, skip_deep=skip_deep)
+        _run_smart(root, cfg, manifest, dry_run=dry_run, skip_deep=skip_deep, check_hook=not no_hook_check)
         return
 
     # Ensure cache is gitignored even if user skipped init
@@ -498,11 +501,11 @@ def _index_and_persist(
     click.echo(f"\n  Done  —  {len(index_entries)} wiki page(s)  —  {total_symbols} symbols indexed\n")
 
 
-def _run_smart(root: Path, cfg: Config, manifest, dry_run: bool, skip_deep: bool) -> None:
+def _run_smart(root: Path, cfg: Config, manifest, dry_run: bool, skip_deep: bool, check_hook: bool = True) -> None:
     from indexer import verify as verify_mod
     from indexer import repair as repair_mod
 
-    report = verify_mod.scan(root, cfg, manifest, skip_deep=skip_deep)
+    report = verify_mod.scan(root, cfg, manifest, skip_deep=skip_deep, check_hook=check_hook)
     verify_mod.print_report(report)
 
     # ── No manifest yet: FILL (full initial index) instead of bailing. ─────────

@@ -1,0 +1,980 @@
+{
+  "last_indexed_commit": "b950860bb04e52f69692358bb14dd59055cf805c",
+  "indexed_at": "2026-06-21T20:10:14.769093+00:00",
+  "files": {
+    "indexer/__init__.py": {
+      "hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [],
+      "scip": {}
+    },
+    "indexer/ast_parser.py": {
+      "hash": "sha256:c76c71cf6f7c6d7a073498716b516d0d861931e51530f16e89b40186dfe9282a",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/ast_parser.py::ASTNode",
+        "indexer/ast_parser.py::_rel",
+        "indexer/ast_parser.py::_extract_imports",
+        "indexer/ast_parser.py::_extract_calls",
+        "indexer/ast_parser.py::_get_class_method_ids",
+        "indexer/ast_parser.py::parse_file",
+        "indexer/ast_parser.py::compute_hash_short",
+        "indexer/ast_parser.py::load_cached_nodes",
+        "indexer/ast_parser.py::save_cached_nodes"
+      ],
+      "scip": {
+        "indexer/ast_parser.py::ASTNode": "indexer/ast_parser.py/ ASTNode#",
+        "indexer/ast_parser.py::_rel": "indexer/ast_parser.py/ _rel().",
+        "indexer/ast_parser.py::_extract_imports": "indexer/ast_parser.py/ _extract_imports().",
+        "indexer/ast_parser.py::_extract_calls": "indexer/ast_parser.py/ _extract_calls().",
+        "indexer/ast_parser.py::_get_class_method_ids": "indexer/ast_parser.py/ _get_class_method_ids().",
+        "indexer/ast_parser.py::parse_file": "indexer/ast_parser.py/ parse_file().",
+        "indexer/ast_parser.py::compute_hash_short": "indexer/ast_parser.py/ compute_hash_short().",
+        "indexer/ast_parser.py::load_cached_nodes": "indexer/ast_parser.py/ load_cached_nodes().",
+        "indexer/ast_parser.py::save_cached_nodes": "indexer/ast_parser.py/ save_cached_nodes()."
+      }
+    },
+    "indexer/cli.py": {
+      "hash": "sha256:57c7dda60ccd5315da10b7dcbed46aa3a3a5e7d7540fbf7322fc3567f315640a",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/cli.py::_ensure_nav_guidance",
+        "indexer/cli.py::main",
+        "indexer/cli.py::init",
+        "indexer/cli.py::run",
+        "indexer/cli.py::status",
+        "indexer/cli.py::hook",
+        "indexer/cli.py::hook_install",
+        "indexer/cli.py::hook_remove",
+        "indexer/cli.py::_ensure_cache_gitignore",
+        "indexer/cli.py::_is_indexable",
+        "indexer/cli.py::_index_files",
+        "indexer/cli.py::_finalise_index_and_skill",
+        "indexer/cli.py::_index_and_persist",
+        "indexer/cli.py::_run_smart"
+      ],
+      "scip": {
+        "indexer/cli.py::_ensure_nav_guidance": "indexer/cli.py/ _ensure_nav_guidance().",
+        "indexer/cli.py::main": "indexer/cli.py/ main().",
+        "indexer/cli.py::init": "indexer/cli.py/ init().",
+        "indexer/cli.py::run": "indexer/cli.py/ run().",
+        "indexer/cli.py::status": "indexer/cli.py/ status().",
+        "indexer/cli.py::hook": "indexer/cli.py/ hook().",
+        "indexer/cli.py::hook_install": "indexer/cli.py/ hook_install().",
+        "indexer/cli.py::hook_remove": "indexer/cli.py/ hook_remove().",
+        "indexer/cli.py::_ensure_cache_gitignore": "indexer/cli.py/ _ensure_cache_gitignore().",
+        "indexer/cli.py::_is_indexable": "indexer/cli.py/ _is_indexable().",
+        "indexer/cli.py::_index_files": "indexer/cli.py/ _index_files().",
+        "indexer/cli.py::_finalise_index_and_skill": "indexer/cli.py/ _finalise_index_and_skill().",
+        "indexer/cli.py::_index_and_persist": "indexer/cli.py/ _index_and_persist().",
+        "indexer/cli.py::_run_smart": "indexer/cli.py/ _run_smart()."
+      }
+    },
+    "indexer/config.py": {
+      "hash": "sha256:2bc3362fc6cdd60244c3067069074ca228bf0fa630d3e03e0e2acf1616ae3b49",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/config.py::Config",
+        "indexer/config.py::load_config",
+        "indexer/config.py::save_config"
+      ],
+      "scip": {
+        "indexer/config.py::Config": "indexer/config.py/ Config#",
+        "indexer/config.py::load_config": "indexer/config.py/ load_config().",
+        "indexer/config.py::save_config": "indexer/config.py/ save_config()."
+      }
+    },
+    "indexer/git.py": {
+      "hash": "sha256:6ff8b104caaeb464ea09a3ba88f75c11ce7bf0c0d1dd978315944f5145d12201",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/git.py::_run",
+        "indexer/git.py::current_commit",
+        "indexer/git.py::staged_files",
+        "indexer/git.py::changed_files_since",
+        "indexer/git.py::all_tracked_files",
+        "indexer/git.py::is_git_repo"
+      ],
+      "scip": {
+        "indexer/git.py::_run": "indexer/git.py/ _run().",
+        "indexer/git.py::current_commit": "indexer/git.py/ current_commit().",
+        "indexer/git.py::staged_files": "indexer/git.py/ staged_files().",
+        "indexer/git.py::changed_files_since": "indexer/git.py/ changed_files_since().",
+        "indexer/git.py::all_tracked_files": "indexer/git.py/ all_tracked_files().",
+        "indexer/git.py::is_git_repo": "indexer/git.py/ is_git_repo()."
+      }
+    },
+    "indexer/graph.py": {
+      "hash": "sha256:2e8196bc354d3f23fbb4bdfa2ac82c8087b3010b684ec5b9d0b4b29bf327156d",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/graph.py::_index_by_id",
+        "indexer/graph.py::_bare_name",
+        "indexer/graph.py::callers_of",
+        "indexer/graph.py::callees_of",
+        "indexer/graph.py::blast_radius",
+        "indexer/graph.py::build_blast_radius_map",
+        "indexer/graph.py::god_nodes",
+        "indexer/graph.py::_adjacency",
+        "indexer/graph.py::pagerank",
+        "indexer/graph.py::ranked_symbols",
+        "indexer/graph.py::_approx_tokens",
+        "indexer/graph.py::repo_map"
+      ],
+      "scip": {
+        "indexer/graph.py::_index_by_id": "indexer/graph.py/ _index_by_id().",
+        "indexer/graph.py::_bare_name": "indexer/graph.py/ _bare_name().",
+        "indexer/graph.py::callers_of": "indexer/graph.py/ callers_of().",
+        "indexer/graph.py::callees_of": "indexer/graph.py/ callees_of().",
+        "indexer/graph.py::blast_radius": "indexer/graph.py/ blast_radius().",
+        "indexer/graph.py::build_blast_radius_map": "indexer/graph.py/ build_blast_radius_map().",
+        "indexer/graph.py::god_nodes": "indexer/graph.py/ god_nodes().",
+        "indexer/graph.py::_adjacency": "indexer/graph.py/ _adjacency().",
+        "indexer/graph.py::pagerank": "indexer/graph.py/ pagerank().",
+        "indexer/graph.py::ranked_symbols": "indexer/graph.py/ ranked_symbols().",
+        "indexer/graph.py::_approx_tokens": "indexer/graph.py/ _approx_tokens().",
+        "indexer/graph.py::repo_map": "indexer/graph.py/ repo_map()."
+      }
+    },
+    "indexer/grouper.py": {
+      "hash": "sha256:658cd5a546c84bfe37838d57c2f267a4b0db91eca7e82725631407a3b1af394b",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/grouper.py::density_group",
+        "indexer/grouper.py::folder_of",
+        "indexer/grouper.py::prefixes",
+        "indexer/grouper.py::resolve_group"
+      ],
+      "scip": {
+        "indexer/grouper.py::density_group": "indexer/grouper.py/ density_group().",
+        "indexer/grouper.py::folder_of": "indexer/grouper.py/ folder_of().",
+        "indexer/grouper.py::prefixes": "indexer/grouper.py/ prefixes().",
+        "indexer/grouper.py::resolve_group": "indexer/grouper.py/ resolve_group()."
+      }
+    },
+    "indexer/hooks.py": {
+      "hash": "sha256:062d39cc658a2cc2302af6ee86806d33a18a0569c32d6cbe2388537d07c7e47a",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/hooks.py::_hook_command",
+        "indexer/hooks.py::_hook_script_fresh",
+        "indexer/hooks.py::_hook_script_append",
+        "indexer/hooks.py::install_hook",
+        "indexer/hooks.py::remove_hook"
+      ],
+      "scip": {
+        "indexer/hooks.py::_hook_command": "indexer/hooks.py/ _hook_command().",
+        "indexer/hooks.py::_hook_script_fresh": "indexer/hooks.py/ _hook_script_fresh().",
+        "indexer/hooks.py::_hook_script_append": "indexer/hooks.py/ _hook_script_append().",
+        "indexer/hooks.py::install_hook": "indexer/hooks.py/ install_hook().",
+        "indexer/hooks.py::remove_hook": "indexer/hooks.py/ remove_hook()."
+      }
+    },
+    "indexer/js_parser.py": {
+      "hash": "sha256:23e1ce7493674f4dfb3b1c2576bb43dc1116d9e68e052bbd5c0b22527f44b508",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/js_parser.py::_rel",
+        "indexer/js_parser.py::_get_language",
+        "indexer/js_parser.py::_node_text",
+        "indexer/js_parser.py::_extract_jsdoc",
+        "indexer/js_parser.py::_extract_imports",
+        "indexer/js_parser.py::_extract_calls",
+        "indexer/js_parser.py::_get_name",
+        "indexer/js_parser.py::parse_js_file",
+        "indexer/js_parser.py::visit",
+        "indexer/js_parser.py::visit",
+        "indexer/js_parser.py::visit"
+      ],
+      "scip": {
+        "indexer/js_parser.py::_rel": "indexer/js_parser.py/ _rel().",
+        "indexer/js_parser.py::_get_language": "indexer/js_parser.py/ _get_language().",
+        "indexer/js_parser.py::_node_text": "indexer/js_parser.py/ _node_text().",
+        "indexer/js_parser.py::_extract_jsdoc": "indexer/js_parser.py/ _extract_jsdoc().",
+        "indexer/js_parser.py::_extract_imports": "indexer/js_parser.py/ _extract_imports().",
+        "indexer/js_parser.py::_extract_calls": "indexer/js_parser.py/ _extract_calls().",
+        "indexer/js_parser.py::_get_name": "indexer/js_parser.py/ _get_name().",
+        "indexer/js_parser.py::parse_js_file": "indexer/js_parser.py/ parse_js_file().",
+        "indexer/js_parser.py::visit": "indexer/js_parser.py/ visit()."
+      }
+    },
+    "indexer/langs.py": {
+      "hash": "sha256:73d5aaa9166f28244075635478c4af4081e72b2efdbcc450d3a2d9a2b3749afe",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/langs.py::is_indexable"
+      ],
+      "scip": {
+        "indexer/langs.py::is_indexable": "indexer/langs.py/ is_indexable()."
+      }
+    },
+    "indexer/llm.py": {
+      "hash": "sha256:0d55d70ad03b08015cb84cd99b25df2c7643a4b3e2cab2e84e41ec262d5b6b6f",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/llm.py::_is_anthropic",
+        "indexer/llm.py::_claude_cli_path",
+        "indexer/llm.py::_claude_cli_completion",
+        "indexer/llm.py::_complete",
+        "indexer/llm.py::_clean_json",
+        "indexer/llm.py::_resolve_api_key",
+        "indexer/llm.py::_anthropic_completion",
+        "indexer/llm.py::describe_nodes",
+        "indexer/llm.py::describe_files",
+        "indexer/llm.py::deep_enrich_page",
+        "indexer/llm.py::deep_enrich_index",
+        "indexer/llm.py::synthesize_commit_message"
+      ],
+      "scip": {
+        "indexer/llm.py::_is_anthropic": "indexer/llm.py/ _is_anthropic().",
+        "indexer/llm.py::_claude_cli_path": "indexer/llm.py/ _claude_cli_path().",
+        "indexer/llm.py::_claude_cli_completion": "indexer/llm.py/ _claude_cli_completion().",
+        "indexer/llm.py::_complete": "indexer/llm.py/ _complete().",
+        "indexer/llm.py::_clean_json": "indexer/llm.py/ _clean_json().",
+        "indexer/llm.py::_resolve_api_key": "indexer/llm.py/ _resolve_api_key().",
+        "indexer/llm.py::_anthropic_completion": "indexer/llm.py/ _anthropic_completion().",
+        "indexer/llm.py::describe_nodes": "indexer/llm.py/ describe_nodes().",
+        "indexer/llm.py::describe_files": "indexer/llm.py/ describe_files().",
+        "indexer/llm.py::deep_enrich_page": "indexer/llm.py/ deep_enrich_page().",
+        "indexer/llm.py::deep_enrich_index": "indexer/llm.py/ deep_enrich_index().",
+        "indexer/llm.py::synthesize_commit_message": "indexer/llm.py/ synthesize_commit_message()."
+      }
+    },
+    "indexer/manifest.py": {
+      "hash": "sha256:a0598ba5459040ccbee537bb59ad3ef45cf9ef693f8bc76cfa0711d6a92756d7",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/manifest.py::FileEntry",
+        "indexer/manifest.py::Manifest",
+        "indexer/manifest.py::Manifest.stale_files",
+        "indexer/manifest.py::compute_hash",
+        "indexer/manifest.py::file_entry_for",
+        "indexer/manifest.py::load_manifest",
+        "indexer/manifest.py::save_manifest"
+      ],
+      "scip": {
+        "indexer/manifest.py::FileEntry": "indexer/manifest.py/ FileEntry#",
+        "indexer/manifest.py::Manifest": "indexer/manifest.py/ Manifest#",
+        "indexer/manifest.py::Manifest.stale_files": "indexer/manifest.py/ Manifest#stale_files().",
+        "indexer/manifest.py::compute_hash": "indexer/manifest.py/ compute_hash().",
+        "indexer/manifest.py::file_entry_for": "indexer/manifest.py/ file_entry_for().",
+        "indexer/manifest.py::load_manifest": "indexer/manifest.py/ load_manifest().",
+        "indexer/manifest.py::save_manifest": "indexer/manifest.py/ save_manifest()."
+      }
+    },
+    "indexer/repair.py": {
+      "hash": "sha256:d5457a907d8fdd83ce0618d0d552870cc3fe1c8dd3a1217a62e86a0243bc6a78",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/repair.py::RepairPlan",
+        "indexer/repair.py::RepairPlan.has_work",
+        "indexer/repair.py::plan",
+        "indexer/repair.py::execute",
+        "indexer/repair.py::_index_entries_from_manifest"
+      ],
+      "scip": {
+        "indexer/repair.py::RepairPlan": "indexer/repair.py/ RepairPlan#",
+        "indexer/repair.py::RepairPlan.has_work": "indexer/repair.py/ RepairPlan#has_work().",
+        "indexer/repair.py::plan": "indexer/repair.py/ plan().",
+        "indexer/repair.py::execute": "indexer/repair.py/ execute().",
+        "indexer/repair.py::_index_entries_from_manifest": "indexer/repair.py/ _index_entries_from_manifest()."
+      }
+    },
+    "indexer/scip.py": {
+      "hash": "sha256:56297b2da785464e358fb221188b6f6bd48d99c540ab1842dd6558f3b30d5059",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/scip.py::_split_id",
+        "indexer/scip.py::scip_symbol"
+      ],
+      "scip": {
+        "indexer/scip.py::_split_id": "indexer/scip.py/ _split_id().",
+        "indexer/scip.py::scip_symbol": "indexer/scip.py/ scip_symbol()."
+      }
+    },
+    "indexer/ts_extract.py": {
+      "hash": "sha256:c10515d01270684521fda3dc0d1aec415053c8e20a241b06bb0981152d1bc442",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/ts_extract.py::LangConfig",
+        "indexer/ts_extract.py::_node_text",
+        "indexer/ts_extract.py::_get_name",
+        "indexer/ts_extract.py::_clean_comment",
+        "indexer/ts_extract.py::_doc_anchor",
+        "indexer/ts_extract.py::_extract_doc",
+        "indexer/ts_extract.py::_extract_imports",
+        "indexer/ts_extract.py::_last_identifier",
+        "indexer/ts_extract.py::_extract_calls",
+        "indexer/ts_extract.py::_load_language",
+        "indexer/ts_extract.py::_resolve_class_node",
+        "indexer/ts_extract.py::_emit_method",
+        "indexer/ts_extract.py::extract_generic",
+        "indexer/ts_extract.py::visit",
+        "indexer/ts_extract.py::visit",
+        "indexer/ts_extract.py::find_methods_in_body",
+        "indexer/ts_extract.py::visit"
+      ],
+      "scip": {
+        "indexer/ts_extract.py::LangConfig": "indexer/ts_extract.py/ LangConfig#",
+        "indexer/ts_extract.py::_node_text": "indexer/ts_extract.py/ _node_text().",
+        "indexer/ts_extract.py::_get_name": "indexer/ts_extract.py/ _get_name().",
+        "indexer/ts_extract.py::_clean_comment": "indexer/ts_extract.py/ _clean_comment().",
+        "indexer/ts_extract.py::_doc_anchor": "indexer/ts_extract.py/ _doc_anchor().",
+        "indexer/ts_extract.py::_extract_doc": "indexer/ts_extract.py/ _extract_doc().",
+        "indexer/ts_extract.py::_extract_imports": "indexer/ts_extract.py/ _extract_imports().",
+        "indexer/ts_extract.py::_last_identifier": "indexer/ts_extract.py/ _last_identifier().",
+        "indexer/ts_extract.py::_extract_calls": "indexer/ts_extract.py/ _extract_calls().",
+        "indexer/ts_extract.py::_load_language": "indexer/ts_extract.py/ _load_language().",
+        "indexer/ts_extract.py::_resolve_class_node": "indexer/ts_extract.py/ _resolve_class_node().",
+        "indexer/ts_extract.py::_emit_method": "indexer/ts_extract.py/ _emit_method().",
+        "indexer/ts_extract.py::extract_generic": "indexer/ts_extract.py/ extract_generic().",
+        "indexer/ts_extract.py::visit": "indexer/ts_extract.py/ visit().",
+        "indexer/ts_extract.py::find_methods_in_body": "indexer/ts_extract.py/ find_methods_in_body()."
+      }
+    },
+    "indexer/verify.py": {
+      "hash": "sha256:f40c6307ff487f85778d3a04906e6a545adbc048e35cdb33b558b5838facb402",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/verify.py::_is_indexable",
+        "indexer/verify.py::VerifyReport",
+        "indexer/verify.py::VerifyReport.total_issues",
+        "indexer/verify.py::VerifyReport.is_clean",
+        "indexer/verify.py::scan",
+        "indexer/verify.py::print_report"
+      ],
+      "scip": {
+        "indexer/verify.py::_is_indexable": "indexer/verify.py/ _is_indexable().",
+        "indexer/verify.py::VerifyReport": "indexer/verify.py/ VerifyReport#",
+        "indexer/verify.py::VerifyReport.total_issues": "indexer/verify.py/ VerifyReport#total_issues().",
+        "indexer/verify.py::VerifyReport.is_clean": "indexer/verify.py/ VerifyReport#is_clean().",
+        "indexer/verify.py::scan": "indexer/verify.py/ scan().",
+        "indexer/verify.py::print_report": "indexer/verify.py/ print_report()."
+      }
+    },
+    "indexer/wiki.py": {
+      "hash": "sha256:29646497276ebd26c53401a0e526dc55eedbf0a481d90efa42e3269cd570bc28",
+      "wiki_page": "wiki/indexer.md",
+      "component_ids": [
+        "indexer/wiki.py::PageContext",
+        "indexer/wiki.py::IndexEntry",
+        "indexer/wiki.py::_jinja_env",
+        "indexer/wiki.py::_first_sentence",
+        "indexer/wiki.py::_tags_from_path",
+        "indexer/wiki.py::_short",
+        "indexer/wiki.py::_capped",
+        "indexer/wiki.py::_symbol_relationships",
+        "indexer/wiki.py::build_page",
+        "indexer/wiki.py::_yaml_frontmatter",
+        "indexer/wiki.py::build_index",
+        "indexer/wiki.py::page_basename",
+        "indexer/wiki.py::page_relpath",
+        "indexer/wiki.py::write_page",
+        "indexer/wiki.py::write_index"
+      ],
+      "scip": {
+        "indexer/wiki.py::PageContext": "indexer/wiki.py/ PageContext#",
+        "indexer/wiki.py::IndexEntry": "indexer/wiki.py/ IndexEntry#",
+        "indexer/wiki.py::_jinja_env": "indexer/wiki.py/ _jinja_env().",
+        "indexer/wiki.py::_first_sentence": "indexer/wiki.py/ _first_sentence().",
+        "indexer/wiki.py::_tags_from_path": "indexer/wiki.py/ _tags_from_path().",
+        "indexer/wiki.py::_short": "indexer/wiki.py/ _short().",
+        "indexer/wiki.py::_capped": "indexer/wiki.py/ _capped().",
+        "indexer/wiki.py::_symbol_relationships": "indexer/wiki.py/ _symbol_relationships().",
+        "indexer/wiki.py::build_page": "indexer/wiki.py/ build_page().",
+        "indexer/wiki.py::_yaml_frontmatter": "indexer/wiki.py/ _yaml_frontmatter().",
+        "indexer/wiki.py::build_index": "indexer/wiki.py/ build_index().",
+        "indexer/wiki.py::page_basename": "indexer/wiki.py/ page_basename().",
+        "indexer/wiki.py::page_relpath": "indexer/wiki.py/ page_relpath().",
+        "indexer/wiki.py::write_page": "indexer/wiki.py/ write_page().",
+        "indexer/wiki.py::write_index": "indexer/wiki.py/ write_index()."
+      }
+    },
+    "tests/__init__.py": {
+      "hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [],
+      "scip": {}
+    },
+    "tests/fixtures/sample_go/server.go": {
+      "hash": "sha256:e462408048228fa0c69bdf9a13caaf1e3c75ea8b0ffaae69769393354faf017d",
+      "wiki_page": "wiki/tests_fixtures.md",
+      "component_ids": [
+        "tests/fixtures/sample_go/server.go::Greet",
+        "tests/fixtures/sample_go/server.go::Server",
+        "tests/fixtures/sample_go/server.go::Start"
+      ],
+      "scip": {
+        "tests/fixtures/sample_go/server.go::Greet": "tests/fixtures/sample_go/server.go/ Greet().",
+        "tests/fixtures/sample_go/server.go::Server": "tests/fixtures/sample_go/server.go/ Server#",
+        "tests/fixtures/sample_go/server.go::Start": "tests/fixtures/sample_go/server.go/ Start()."
+      }
+    },
+    "tests/fixtures/sample_java/Widget.java": {
+      "hash": "sha256:54f1a0f199b23fc2481119cda14532c97bc094def7281d8e0bd161ea7bddba85",
+      "wiki_page": "wiki/tests_fixtures.md",
+      "component_ids": [
+        "tests/fixtures/sample_java/Widget.java::Widget",
+        "tests/fixtures/sample_java/Widget.java::Widget.bump",
+        "tests/fixtures/sample_java/Widget.java::Widget.helper"
+      ],
+      "scip": {
+        "tests/fixtures/sample_java/Widget.java::Widget": "tests/fixtures/sample_java/Widget.java/ Widget#",
+        "tests/fixtures/sample_java/Widget.java::Widget.bump": "tests/fixtures/sample_java/Widget.java/ Widget#bump().",
+        "tests/fixtures/sample_java/Widget.java::Widget.helper": "tests/fixtures/sample_java/Widget.java/ Widget#helper()."
+      }
+    },
+    "tests/fixtures/sample_py/auth.py": {
+      "hash": "sha256:21deaa3f6b8ca9142669d72baaaebf2c2f742aeebd06e6b7e3c6a2de32dddb4b",
+      "wiki_page": "wiki/tests_fixtures.md",
+      "component_ids": [
+        "tests/fixtures/sample_py/auth.py::TokenValidator",
+        "tests/fixtures/sample_py/auth.py::TokenValidator.refresh",
+        "tests/fixtures/sample_py/auth.py::require_auth",
+        "tests/fixtures/sample_py/auth.py::wrapper"
+      ],
+      "scip": {
+        "tests/fixtures/sample_py/auth.py::TokenValidator": "tests/fixtures/sample_py/auth.py/ TokenValidator#",
+        "tests/fixtures/sample_py/auth.py::TokenValidator.refresh": "tests/fixtures/sample_py/auth.py/ TokenValidator#refresh().",
+        "tests/fixtures/sample_py/auth.py::require_auth": "tests/fixtures/sample_py/auth.py/ require_auth().",
+        "tests/fixtures/sample_py/auth.py::wrapper": "tests/fixtures/sample_py/auth.py/ wrapper()."
+      }
+    },
+    "tests/fixtures/sample_ruby/widget.rb": {
+      "hash": "sha256:83448348099d2db4bacde796f4e1f75d5d3cfc385e62238136b050aa7b1c3df3",
+      "wiki_page": "wiki/tests_fixtures.md",
+      "component_ids": [
+        "tests/fixtures/sample_ruby/widget.rb::Greeter",
+        "tests/fixtures/sample_ruby/widget.rb::Greeter.hello",
+        "tests/fixtures/sample_ruby/widget.rb::Widget",
+        "tests/fixtures/sample_ruby/widget.rb::Widget.bump",
+        "tests/fixtures/sample_ruby/widget.rb::top_level"
+      ],
+      "scip": {
+        "tests/fixtures/sample_ruby/widget.rb::Greeter": "tests/fixtures/sample_ruby/widget.rb/ Greeter#",
+        "tests/fixtures/sample_ruby/widget.rb::Greeter.hello": "tests/fixtures/sample_ruby/widget.rb/ Greeter#hello().",
+        "tests/fixtures/sample_ruby/widget.rb::Widget": "tests/fixtures/sample_ruby/widget.rb/ Widget#",
+        "tests/fixtures/sample_ruby/widget.rb::Widget.bump": "tests/fixtures/sample_ruby/widget.rb/ Widget#bump().",
+        "tests/fixtures/sample_ruby/widget.rb::top_level": "tests/fixtures/sample_ruby/widget.rb/ top_level()."
+      }
+    },
+    "tests/fixtures/sample_rust/widget.rs": {
+      "hash": "sha256:dc21d2592d16edd4f5a06cf5526a91b1ed3d95ad6ca1938b7b7d49faccb4d1ea",
+      "wiki_page": "wiki/tests_fixtures.md",
+      "component_ids": [
+        "tests/fixtures/sample_rust/widget.rs::Widget",
+        "tests/fixtures/sample_rust/widget.rs::Widget.bump",
+        "tests/fixtures/sample_rust/widget.rs::greet",
+        "tests/fixtures/sample_rust/widget.rs::Speak",
+        "tests/fixtures/sample_rust/widget.rs::speak"
+      ],
+      "scip": {
+        "tests/fixtures/sample_rust/widget.rs::Widget": "tests/fixtures/sample_rust/widget.rs/ Widget#",
+        "tests/fixtures/sample_rust/widget.rs::Widget.bump": "tests/fixtures/sample_rust/widget.rs/ Widget#bump().",
+        "tests/fixtures/sample_rust/widget.rs::greet": "tests/fixtures/sample_rust/widget.rs/ greet().",
+        "tests/fixtures/sample_rust/widget.rs::Speak": "tests/fixtures/sample_rust/widget.rs/ Speak#",
+        "tests/fixtures/sample_rust/widget.rs::speak": "tests/fixtures/sample_rust/widget.rs/ speak()."
+      }
+    },
+    "tests/test_ast_parser.py": {
+      "hash": "sha256:f5fdba92244fb1f4d72c095ee58b5262cc1475b0bf58fd69d275f9b5e21033ee",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [
+        "tests/test_ast_parser.py::test_parse_returns_nodes",
+        "tests/test_ast_parser.py::test_function_node",
+        "tests/test_ast_parser.py::test_method_node",
+        "tests/test_ast_parser.py::test_class_node",
+        "tests/test_ast_parser.py::test_docstring_extracted",
+        "tests/test_ast_parser.py::test_imports_extracted",
+        "tests/test_ast_parser.py::test_calls_extracted",
+        "tests/test_ast_parser.py::test_cache_roundtrip"
+      ],
+      "scip": {
+        "tests/test_ast_parser.py::test_parse_returns_nodes": "tests/test_ast_parser.py/ test_parse_returns_nodes().",
+        "tests/test_ast_parser.py::test_function_node": "tests/test_ast_parser.py/ test_function_node().",
+        "tests/test_ast_parser.py::test_method_node": "tests/test_ast_parser.py/ test_method_node().",
+        "tests/test_ast_parser.py::test_class_node": "tests/test_ast_parser.py/ test_class_node().",
+        "tests/test_ast_parser.py::test_docstring_extracted": "tests/test_ast_parser.py/ test_docstring_extracted().",
+        "tests/test_ast_parser.py::test_imports_extracted": "tests/test_ast_parser.py/ test_imports_extracted().",
+        "tests/test_ast_parser.py::test_calls_extracted": "tests/test_ast_parser.py/ test_calls_extracted().",
+        "tests/test_ast_parser.py::test_cache_roundtrip": "tests/test_ast_parser.py/ test_cache_roundtrip()."
+      }
+    },
+    "tests/test_config.py": {
+      "hash": "sha256:d4f0916ebe1c168a897a657077b118af0185c66bdef679cf3b8b468ef4ca56e4",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [
+        "tests/test_config.py::test_load_defaults",
+        "tests/test_config.py::test_save_and_reload",
+        "tests/test_config.py::test_partial_toml_uses_defaults"
+      ],
+      "scip": {
+        "tests/test_config.py::test_load_defaults": "tests/test_config.py/ test_load_defaults().",
+        "tests/test_config.py::test_save_and_reload": "tests/test_config.py/ test_save_and_reload().",
+        "tests/test_config.py::test_partial_toml_uses_defaults": "tests/test_config.py/ test_partial_toml_uses_defaults()."
+      }
+    },
+    "tests/test_graph.py": {
+      "hash": "sha256:d13515fc6d1bb27d0329033ae8fea849981d6a7897e0a27db7aee1f4942f1a83",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [
+        "tests/test_graph.py::_node",
+        "tests/test_graph.py::_chain_nodes",
+        "tests/test_graph.py::test_callers_of_returns_caller_ids",
+        "tests/test_graph.py::test_callers_of_empty_when_no_callers",
+        "tests/test_graph.py::test_callees_of_resolves_bare_names_to_ids",
+        "tests/test_graph.py::test_callees_of_skips_unresolvable_external_names",
+        "tests/test_graph.py::test_blast_radius_is_transitive_reverse_reachability",
+        "tests/test_graph.py::test_blast_radius_excludes_self",
+        "tests/test_graph.py::test_blast_radius_leaf_caller_is_empty",
+        "tests/test_graph.py::test_blast_radius_handles_cycles",
+        "tests/test_graph.py::test_blast_radius_diamond",
+        "tests/test_graph.py::test_blast_radius_unknown_symbol_is_empty",
+        "tests/test_graph.py::test_god_nodes_ranks_by_degree",
+        "tests/test_graph.py::test_god_nodes_respects_n",
+        "tests/test_graph.py::test_god_nodes_empty_input",
+        "tests/test_graph.py::test_god_nodes_n_larger_than_nodes",
+        "tests/test_graph.py::test_build_blast_radius_map_keys_every_node",
+        "tests/test_graph.py::test_pagerank_keys_every_node_and_sums_to_one",
+        "tests/test_graph.py::test_pagerank_empty_input",
+        "tests/test_graph.py::test_pagerank_ranks_a_hub_above_leaves",
+        "tests/test_graph.py::test_pagerank_is_deterministic",
+        "tests/test_graph.py::test_pagerank_handles_cycles",
+        "tests/test_graph.py::test_ranked_symbols_orders_by_pagerank_desc",
+        "tests/test_graph.py::test_ranked_symbols_empty",
+        "tests/test_graph.py::test_repo_map_returns_string",
+        "tests/test_graph.py::test_repo_map_respects_token_budget",
+        "tests/test_graph.py::test_repo_map_leads_with_highest_ranked",
+        "tests/test_graph.py::test_repo_map_empty",
+        "tests/test_graph.py::test_repo_map_larger_budget_includes_more"
+      ],
+      "scip": {
+        "tests/test_graph.py::_node": "tests/test_graph.py/ _node().",
+        "tests/test_graph.py::_chain_nodes": "tests/test_graph.py/ _chain_nodes().",
+        "tests/test_graph.py::test_callers_of_returns_caller_ids": "tests/test_graph.py/ test_callers_of_returns_caller_ids().",
+        "tests/test_graph.py::test_callers_of_empty_when_no_callers": "tests/test_graph.py/ test_callers_of_empty_when_no_callers().",
+        "tests/test_graph.py::test_callees_of_resolves_bare_names_to_ids": "tests/test_graph.py/ test_callees_of_resolves_bare_names_to_ids().",
+        "tests/test_graph.py::test_callees_of_skips_unresolvable_external_names": "tests/test_graph.py/ test_callees_of_skips_unresolvable_external_names().",
+        "tests/test_graph.py::test_blast_radius_is_transitive_reverse_reachability": "tests/test_graph.py/ test_blast_radius_is_transitive_reverse_reachability().",
+        "tests/test_graph.py::test_blast_radius_excludes_self": "tests/test_graph.py/ test_blast_radius_excludes_self().",
+        "tests/test_graph.py::test_blast_radius_leaf_caller_is_empty": "tests/test_graph.py/ test_blast_radius_leaf_caller_is_empty().",
+        "tests/test_graph.py::test_blast_radius_handles_cycles": "tests/test_graph.py/ test_blast_radius_handles_cycles().",
+        "tests/test_graph.py::test_blast_radius_diamond": "tests/test_graph.py/ test_blast_radius_diamond().",
+        "tests/test_graph.py::test_blast_radius_unknown_symbol_is_empty": "tests/test_graph.py/ test_blast_radius_unknown_symbol_is_empty().",
+        "tests/test_graph.py::test_god_nodes_ranks_by_degree": "tests/test_graph.py/ test_god_nodes_ranks_by_degree().",
+        "tests/test_graph.py::test_god_nodes_respects_n": "tests/test_graph.py/ test_god_nodes_respects_n().",
+        "tests/test_graph.py::test_god_nodes_empty_input": "tests/test_graph.py/ test_god_nodes_empty_input().",
+        "tests/test_graph.py::test_god_nodes_n_larger_than_nodes": "tests/test_graph.py/ test_god_nodes_n_larger_than_nodes().",
+        "tests/test_graph.py::test_build_blast_radius_map_keys_every_node": "tests/test_graph.py/ test_build_blast_radius_map_keys_every_node().",
+        "tests/test_graph.py::test_pagerank_keys_every_node_and_sums_to_one": "tests/test_graph.py/ test_pagerank_keys_every_node_and_sums_to_one().",
+        "tests/test_graph.py::test_pagerank_empty_input": "tests/test_graph.py/ test_pagerank_empty_input().",
+        "tests/test_graph.py::test_pagerank_ranks_a_hub_above_leaves": "tests/test_graph.py/ test_pagerank_ranks_a_hub_above_leaves().",
+        "tests/test_graph.py::test_pagerank_is_deterministic": "tests/test_graph.py/ test_pagerank_is_deterministic().",
+        "tests/test_graph.py::test_pagerank_handles_cycles": "tests/test_graph.py/ test_pagerank_handles_cycles().",
+        "tests/test_graph.py::test_ranked_symbols_orders_by_pagerank_desc": "tests/test_graph.py/ test_ranked_symbols_orders_by_pagerank_desc().",
+        "tests/test_graph.py::test_ranked_symbols_empty": "tests/test_graph.py/ test_ranked_symbols_empty().",
+        "tests/test_graph.py::test_repo_map_returns_string": "tests/test_graph.py/ test_repo_map_returns_string().",
+        "tests/test_graph.py::test_repo_map_respects_token_budget": "tests/test_graph.py/ test_repo_map_respects_token_budget().",
+        "tests/test_graph.py::test_repo_map_leads_with_highest_ranked": "tests/test_graph.py/ test_repo_map_leads_with_highest_ranked().",
+        "tests/test_graph.py::test_repo_map_empty": "tests/test_graph.py/ test_repo_map_empty().",
+        "tests/test_graph.py::test_repo_map_larger_budget_includes_more": "tests/test_graph.py/ test_repo_map_larger_budget_includes_more()."
+      }
+    },
+    "tests/test_grouper.py": {
+      "hash": "sha256:19bc74dde19a1ed61e6678f81719f36a85c221eddca6fea25c965b9524919ef2",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [
+        "tests/test_grouper.py::test_sparse_folders_merge_to_parent",
+        "tests/test_grouper.py::test_dense_folder_gets_own_page",
+        "tests/test_grouper.py::test_different_folders_get_separate_groups",
+        "tests/test_grouper.py::test_deep_sparse_merges_upward",
+        "tests/test_grouper.py::test_root_level_files",
+        "tests/test_grouper.py::test_returns_all_files",
+        "tests/test_grouper.py::test_root_files_count_correctly"
+      ],
+      "scip": {
+        "tests/test_grouper.py::test_sparse_folders_merge_to_parent": "tests/test_grouper.py/ test_sparse_folders_merge_to_parent().",
+        "tests/test_grouper.py::test_dense_folder_gets_own_page": "tests/test_grouper.py/ test_dense_folder_gets_own_page().",
+        "tests/test_grouper.py::test_different_folders_get_separate_groups": "tests/test_grouper.py/ test_different_folders_get_separate_groups().",
+        "tests/test_grouper.py::test_deep_sparse_merges_upward": "tests/test_grouper.py/ test_deep_sparse_merges_upward().",
+        "tests/test_grouper.py::test_root_level_files": "tests/test_grouper.py/ test_root_level_files().",
+        "tests/test_grouper.py::test_returns_all_files": "tests/test_grouper.py/ test_returns_all_files().",
+        "tests/test_grouper.py::test_root_files_count_correctly": "tests/test_grouper.py/ test_root_files_count_correctly()."
+      }
+    },
+    "tests/test_init.py": {
+      "hash": "sha256:56ff6ddf0a69296a3f986fbbcc7c2be55b13bfb493fa3c24a85234ecd5c3d367",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [
+        "tests/test_init.py::_bootstrap_repo",
+        "tests/test_init.py::test_init_creates_agents_md",
+        "tests/test_init.py::test_init_creates_claude_md_unchanged_behavior",
+        "tests/test_init.py::test_init_appends_to_existing_agents_md",
+        "tests/test_init.py::test_init_does_not_duplicate_agents_md_guidance",
+        "tests/test_init.py::test_claude_and_agents_share_guidance_constant"
+      ],
+      "scip": {
+        "tests/test_init.py::_bootstrap_repo": "tests/test_init.py/ _bootstrap_repo().",
+        "tests/test_init.py::test_init_creates_agents_md": "tests/test_init.py/ test_init_creates_agents_md().",
+        "tests/test_init.py::test_init_creates_claude_md_unchanged_behavior": "tests/test_init.py/ test_init_creates_claude_md_unchanged_behavior().",
+        "tests/test_init.py::test_init_appends_to_existing_agents_md": "tests/test_init.py/ test_init_appends_to_existing_agents_md().",
+        "tests/test_init.py::test_init_does_not_duplicate_agents_md_guidance": "tests/test_init.py/ test_init_does_not_duplicate_agents_md_guidance().",
+        "tests/test_init.py::test_claude_and_agents_share_guidance_constant": "tests/test_init.py/ test_claude_and_agents_share_guidance_constant()."
+      }
+    },
+    "tests/test_langs.py": {
+      "hash": "sha256:753c0a5a6fb35724f561e40d270fca51280a2dcc72b1d8ceb16bb37573b5a072",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [
+        "tests/test_langs.py::test_indexable_suffixes_is_union_of_parser_sets",
+        "tests/test_langs.py::test_other_suffixes_match_ts_extract_lang_configs",
+        "tests/test_langs.py::test_js_ts_suffixes_match_dispatch",
+        "tests/test_langs.py::test_is_indexable_accepts_known_suffixes",
+        "tests/test_langs.py::test_is_indexable_rejects_unknown_suffix",
+        "tests/test_langs.py::test_is_indexable_honours_part_glob",
+        "tests/test_langs.py::test_is_indexable_honours_path_glob"
+      ],
+      "scip": {
+        "tests/test_langs.py::test_indexable_suffixes_is_union_of_parser_sets": "tests/test_langs.py/ test_indexable_suffixes_is_union_of_parser_sets().",
+        "tests/test_langs.py::test_other_suffixes_match_ts_extract_lang_configs": "tests/test_langs.py/ test_other_suffixes_match_ts_extract_lang_configs().",
+        "tests/test_langs.py::test_js_ts_suffixes_match_dispatch": "tests/test_langs.py/ test_js_ts_suffixes_match_dispatch().",
+        "tests/test_langs.py::test_is_indexable_accepts_known_suffixes": "tests/test_langs.py/ test_is_indexable_accepts_known_suffixes().",
+        "tests/test_langs.py::test_is_indexable_rejects_unknown_suffix": "tests/test_langs.py/ test_is_indexable_rejects_unknown_suffix().",
+        "tests/test_langs.py::test_is_indexable_honours_part_glob": "tests/test_langs.py/ test_is_indexable_honours_part_glob().",
+        "tests/test_langs.py::test_is_indexable_honours_path_glob": "tests/test_langs.py/ test_is_indexable_honours_path_glob()."
+      }
+    },
+    "tests/test_llm_dispatch.py": {
+      "hash": "sha256:fa12c5eff525824413cb4ca2636ba77842dca0ec68c3bf396b21e241d8ea9ef2",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [
+        "tests/test_llm_dispatch.py::_cfg",
+        "tests/test_llm_dispatch.py::test_explicit_api_key_takes_priority_over_cli",
+        "tests/test_llm_dispatch.py::test_falls_back_to_cli_when_no_key_and_cli_present",
+        "tests/test_llm_dispatch.py::test_deep_flag_uses_configured_model_cli",
+        "tests/test_llm_dispatch.py::test_no_key_no_cli_raises_so_callers_fall_back",
+        "tests/test_llm_dispatch.py::test_describe_nodes_uses_cli_path_end_to_end",
+        "tests/test_llm_dispatch.py::test_claude_cli_completion_invokes_print_mode",
+        "tests/test_llm_dispatch.py::test_claude_cli_completion_raises_on_nonzero",
+        "tests/test_llm_dispatch.py::test_clean_json_plain",
+        "tests/test_llm_dispatch.py::test_clean_json_fenced",
+        "tests/test_llm_dispatch.py::test_clean_json_preamble_then_fence",
+        "tests/test_llm_dispatch.py::test_clean_json_preamble_then_bare_object",
+        "tests/test_llm_dispatch.py::test_clean_json_list_payload",
+        "tests/test_llm_dispatch.py::test_clean_json_raises_on_garbage",
+        "tests/test_llm_dispatch.py::fake_sdk",
+        "tests/test_llm_dispatch.py::fake_cli",
+        "tests/test_llm_dispatch.py::fake_cli",
+        "tests/test_llm_dispatch.py::FakeProc",
+        "tests/test_llm_dispatch.py::fake_run",
+        "tests/test_llm_dispatch.py::FakeProc"
+      ],
+      "scip": {
+        "tests/test_llm_dispatch.py::_cfg": "tests/test_llm_dispatch.py/ _cfg().",
+        "tests/test_llm_dispatch.py::test_explicit_api_key_takes_priority_over_cli": "tests/test_llm_dispatch.py/ test_explicit_api_key_takes_priority_over_cli().",
+        "tests/test_llm_dispatch.py::test_falls_back_to_cli_when_no_key_and_cli_present": "tests/test_llm_dispatch.py/ test_falls_back_to_cli_when_no_key_and_cli_present().",
+        "tests/test_llm_dispatch.py::test_deep_flag_uses_configured_model_cli": "tests/test_llm_dispatch.py/ test_deep_flag_uses_configured_model_cli().",
+        "tests/test_llm_dispatch.py::test_no_key_no_cli_raises_so_callers_fall_back": "tests/test_llm_dispatch.py/ test_no_key_no_cli_raises_so_callers_fall_back().",
+        "tests/test_llm_dispatch.py::test_describe_nodes_uses_cli_path_end_to_end": "tests/test_llm_dispatch.py/ test_describe_nodes_uses_cli_path_end_to_end().",
+        "tests/test_llm_dispatch.py::test_claude_cli_completion_invokes_print_mode": "tests/test_llm_dispatch.py/ test_claude_cli_completion_invokes_print_mode().",
+        "tests/test_llm_dispatch.py::test_claude_cli_completion_raises_on_nonzero": "tests/test_llm_dispatch.py/ test_claude_cli_completion_raises_on_nonzero().",
+        "tests/test_llm_dispatch.py::test_clean_json_plain": "tests/test_llm_dispatch.py/ test_clean_json_plain().",
+        "tests/test_llm_dispatch.py::test_clean_json_fenced": "tests/test_llm_dispatch.py/ test_clean_json_fenced().",
+        "tests/test_llm_dispatch.py::test_clean_json_preamble_then_fence": "tests/test_llm_dispatch.py/ test_clean_json_preamble_then_fence().",
+        "tests/test_llm_dispatch.py::test_clean_json_preamble_then_bare_object": "tests/test_llm_dispatch.py/ test_clean_json_preamble_then_bare_object().",
+        "tests/test_llm_dispatch.py::test_clean_json_list_payload": "tests/test_llm_dispatch.py/ test_clean_json_list_payload().",
+        "tests/test_llm_dispatch.py::test_clean_json_raises_on_garbage": "tests/test_llm_dispatch.py/ test_clean_json_raises_on_garbage().",
+        "tests/test_llm_dispatch.py::fake_sdk": "tests/test_llm_dispatch.py/ fake_sdk().",
+        "tests/test_llm_dispatch.py::fake_cli": "tests/test_llm_dispatch.py/ fake_cli().",
+        "tests/test_llm_dispatch.py::FakeProc": "tests/test_llm_dispatch.py/ FakeProc#",
+        "tests/test_llm_dispatch.py::fake_run": "tests/test_llm_dispatch.py/ fake_run()."
+      }
+    },
+    "tests/test_manifest.py": {
+      "hash": "sha256:a0a292f3625cf43f5dd1b0784dfaa081939cf871b0a2510d0f785eb8fd13e21c",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [
+        "tests/test_manifest.py::test_compute_hash_stable",
+        "tests/test_manifest.py::test_empty_manifest_on_missing",
+        "tests/test_manifest.py::test_save_and_reload",
+        "tests/test_manifest.py::test_stale_files_detected",
+        "tests/test_manifest.py::test_fresh_file_not_stale",
+        "tests/test_manifest.py::test_load_manifest_missing_component_ids"
+      ],
+      "scip": {
+        "tests/test_manifest.py::test_compute_hash_stable": "tests/test_manifest.py/ test_compute_hash_stable().",
+        "tests/test_manifest.py::test_empty_manifest_on_missing": "tests/test_manifest.py/ test_empty_manifest_on_missing().",
+        "tests/test_manifest.py::test_save_and_reload": "tests/test_manifest.py/ test_save_and_reload().",
+        "tests/test_manifest.py::test_stale_files_detected": "tests/test_manifest.py/ test_stale_files_detected().",
+        "tests/test_manifest.py::test_fresh_file_not_stale": "tests/test_manifest.py/ test_fresh_file_not_stale().",
+        "tests/test_manifest.py::test_load_manifest_missing_component_ids": "tests/test_manifest.py/ test_load_manifest_missing_component_ids()."
+      }
+    },
+    "tests/test_multilang.py": {
+      "hash": "sha256:1e11334d152a65cec8f13a94575e262e86fa2c842ad7135ffa2a110d060e6eef",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [
+        "tests/test_multilang.py::_grammar_available",
+        "tests/test_multilang.py::_by_id",
+        "tests/test_multilang.py::test_go_yields_nonzero_symbols",
+        "tests/test_multilang.py::test_go_function",
+        "tests/test_multilang.py::test_go_struct_is_class",
+        "tests/test_multilang.py::test_go_method",
+        "tests/test_multilang.py::test_go_docstring",
+        "tests/test_multilang.py::test_go_calls",
+        "tests/test_multilang.py::test_go_imports",
+        "tests/test_multilang.py::test_java_yields_nonzero_symbols",
+        "tests/test_multilang.py::test_java_class",
+        "tests/test_multilang.py::test_java_method",
+        "tests/test_multilang.py::test_java_static_method",
+        "tests/test_multilang.py::test_java_docstring",
+        "tests/test_multilang.py::test_java_calls",
+        "tests/test_multilang.py::test_java_imports",
+        "tests/test_multilang.py::test_ruby_yields_nonzero_symbols",
+        "tests/test_multilang.py::test_ruby_class_and_module",
+        "tests/test_multilang.py::test_ruby_method",
+        "tests/test_multilang.py::test_ruby_top_level_function",
+        "tests/test_multilang.py::test_ruby_docstring",
+        "tests/test_multilang.py::test_ruby_calls",
+        "tests/test_multilang.py::test_rust_yields_nonzero_symbols",
+        "tests/test_multilang.py::test_rust_struct_and_trait_are_classes",
+        "tests/test_multilang.py::test_rust_free_function",
+        "tests/test_multilang.py::test_rust_impl_method",
+        "tests/test_multilang.py::test_rust_docstring",
+        "tests/test_multilang.py::test_rust_calls",
+        "tests/test_multilang.py::test_unsupported_suffix_returns_empty"
+      ],
+      "scip": {
+        "tests/test_multilang.py::_grammar_available": "tests/test_multilang.py/ _grammar_available().",
+        "tests/test_multilang.py::_by_id": "tests/test_multilang.py/ _by_id().",
+        "tests/test_multilang.py::test_go_yields_nonzero_symbols": "tests/test_multilang.py/ test_go_yields_nonzero_symbols().",
+        "tests/test_multilang.py::test_go_function": "tests/test_multilang.py/ test_go_function().",
+        "tests/test_multilang.py::test_go_struct_is_class": "tests/test_multilang.py/ test_go_struct_is_class().",
+        "tests/test_multilang.py::test_go_method": "tests/test_multilang.py/ test_go_method().",
+        "tests/test_multilang.py::test_go_docstring": "tests/test_multilang.py/ test_go_docstring().",
+        "tests/test_multilang.py::test_go_calls": "tests/test_multilang.py/ test_go_calls().",
+        "tests/test_multilang.py::test_go_imports": "tests/test_multilang.py/ test_go_imports().",
+        "tests/test_multilang.py::test_java_yields_nonzero_symbols": "tests/test_multilang.py/ test_java_yields_nonzero_symbols().",
+        "tests/test_multilang.py::test_java_class": "tests/test_multilang.py/ test_java_class().",
+        "tests/test_multilang.py::test_java_method": "tests/test_multilang.py/ test_java_method().",
+        "tests/test_multilang.py::test_java_static_method": "tests/test_multilang.py/ test_java_static_method().",
+        "tests/test_multilang.py::test_java_docstring": "tests/test_multilang.py/ test_java_docstring().",
+        "tests/test_multilang.py::test_java_calls": "tests/test_multilang.py/ test_java_calls().",
+        "tests/test_multilang.py::test_java_imports": "tests/test_multilang.py/ test_java_imports().",
+        "tests/test_multilang.py::test_ruby_yields_nonzero_symbols": "tests/test_multilang.py/ test_ruby_yields_nonzero_symbols().",
+        "tests/test_multilang.py::test_ruby_class_and_module": "tests/test_multilang.py/ test_ruby_class_and_module().",
+        "tests/test_multilang.py::test_ruby_method": "tests/test_multilang.py/ test_ruby_method().",
+        "tests/test_multilang.py::test_ruby_top_level_function": "tests/test_multilang.py/ test_ruby_top_level_function().",
+        "tests/test_multilang.py::test_ruby_docstring": "tests/test_multilang.py/ test_ruby_docstring().",
+        "tests/test_multilang.py::test_ruby_calls": "tests/test_multilang.py/ test_ruby_calls().",
+        "tests/test_multilang.py::test_rust_yields_nonzero_symbols": "tests/test_multilang.py/ test_rust_yields_nonzero_symbols().",
+        "tests/test_multilang.py::test_rust_struct_and_trait_are_classes": "tests/test_multilang.py/ test_rust_struct_and_trait_are_classes().",
+        "tests/test_multilang.py::test_rust_free_function": "tests/test_multilang.py/ test_rust_free_function().",
+        "tests/test_multilang.py::test_rust_impl_method": "tests/test_multilang.py/ test_rust_impl_method().",
+        "tests/test_multilang.py::test_rust_docstring": "tests/test_multilang.py/ test_rust_docstring().",
+        "tests/test_multilang.py::test_rust_calls": "tests/test_multilang.py/ test_rust_calls().",
+        "tests/test_multilang.py::test_unsupported_suffix_returns_empty": "tests/test_multilang.py/ test_unsupported_suffix_returns_empty()."
+      }
+    },
+    "tests/test_repair_plan.py": {
+      "hash": "sha256:d2dfe14a62e1fd74b724bc79463ac9397a828efe41fa47b0acc351c9719ccac5",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [
+        "tests/test_repair_plan.py::_empty_manifest",
+        "tests/test_repair_plan.py::test_clean_report_produces_empty_plan",
+        "tests/test_repair_plan.py::test_stale_and_untracked_files_go_to_reindex",
+        "tests/test_repair_plan.py::test_missing_wiki_page_pulls_files_from_manifest",
+        "tests/test_repair_plan.py::test_pages_missing_deep_included_when_deep_active",
+        "tests/test_repair_plan.py::test_pages_missing_deep_excluded_when_skip_deep",
+        "tests/test_repair_plan.py::test_cleanup_ops_carried_through",
+        "tests/test_repair_plan.py::test_execute_restores_agents_md",
+        "tests/test_repair_plan.py::test_execute_deletes_orphan_pages_and_prunes_manifest",
+        "tests/test_repair_plan.py::test_execute_runs_reindex_for_files",
+        "tests/test_repair_plan.py::fake_index_files",
+        "tests/test_repair_plan.py::fake_finalise"
+      ],
+      "scip": {
+        "tests/test_repair_plan.py::_empty_manifest": "tests/test_repair_plan.py/ _empty_manifest().",
+        "tests/test_repair_plan.py::test_clean_report_produces_empty_plan": "tests/test_repair_plan.py/ test_clean_report_produces_empty_plan().",
+        "tests/test_repair_plan.py::test_stale_and_untracked_files_go_to_reindex": "tests/test_repair_plan.py/ test_stale_and_untracked_files_go_to_reindex().",
+        "tests/test_repair_plan.py::test_missing_wiki_page_pulls_files_from_manifest": "tests/test_repair_plan.py/ test_missing_wiki_page_pulls_files_from_manifest().",
+        "tests/test_repair_plan.py::test_pages_missing_deep_included_when_deep_active": "tests/test_repair_plan.py/ test_pages_missing_deep_included_when_deep_active().",
+        "tests/test_repair_plan.py::test_pages_missing_deep_excluded_when_skip_deep": "tests/test_repair_plan.py/ test_pages_missing_deep_excluded_when_skip_deep().",
+        "tests/test_repair_plan.py::test_cleanup_ops_carried_through": "tests/test_repair_plan.py/ test_cleanup_ops_carried_through().",
+        "tests/test_repair_plan.py::test_execute_restores_agents_md": "tests/test_repair_plan.py/ test_execute_restores_agents_md().",
+        "tests/test_repair_plan.py::test_execute_deletes_orphan_pages_and_prunes_manifest": "tests/test_repair_plan.py/ test_execute_deletes_orphan_pages_and_prunes_manifest().",
+        "tests/test_repair_plan.py::test_execute_runs_reindex_for_files": "tests/test_repair_plan.py/ test_execute_runs_reindex_for_files().",
+        "tests/test_repair_plan.py::fake_index_files": "tests/test_repair_plan.py/ fake_index_files().",
+        "tests/test_repair_plan.py::fake_finalise": "tests/test_repair_plan.py/ fake_finalise()."
+      }
+    },
+    "tests/test_scip.py": {
+      "hash": "sha256:647f0d7c58519b2a354ba02190830fbd49d963031405cb15913768308a671778",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [
+        "tests/test_scip.py::_node",
+        "tests/test_scip.py::test_top_level_function",
+        "tests/test_scip.py::test_class",
+        "tests/test_scip.py::test_method",
+        "tests/test_scip.py::test_method_with_dotted_class_path_uses_last_segment_as_member",
+        "tests/test_scip.py::test_root_level_file",
+        "tests/test_scip.py::test_is_deterministic",
+        "tests/test_scip.py::test_unknown_type_falls_back_to_term",
+        "tests/test_scip.py::test_malformed_id_without_separator_is_safe"
+      ],
+      "scip": {
+        "tests/test_scip.py::_node": "tests/test_scip.py/ _node().",
+        "tests/test_scip.py::test_top_level_function": "tests/test_scip.py/ test_top_level_function().",
+        "tests/test_scip.py::test_class": "tests/test_scip.py/ test_class().",
+        "tests/test_scip.py::test_method": "tests/test_scip.py/ test_method().",
+        "tests/test_scip.py::test_method_with_dotted_class_path_uses_last_segment_as_member": "tests/test_scip.py/ test_method_with_dotted_class_path_uses_last_segment_as_member().",
+        "tests/test_scip.py::test_root_level_file": "tests/test_scip.py/ test_root_level_file().",
+        "tests/test_scip.py::test_is_deterministic": "tests/test_scip.py/ test_is_deterministic().",
+        "tests/test_scip.py::test_unknown_type_falls_back_to_term": "tests/test_scip.py/ test_unknown_type_falls_back_to_term().",
+        "tests/test_scip.py::test_malformed_id_without_separator_is_safe": "tests/test_scip.py/ test_malformed_id_without_separator_is_safe()."
+      }
+    },
+    "tests/test_smart_integration.py": {
+      "hash": "sha256:284f5cc6f1321d197943d50d932e614bc2c417110f32441f2cc036ab51dd1540",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [
+        "tests/test_smart_integration.py::_bootstrap_repo",
+        "tests/test_smart_integration.py::test_smart_rejects_combo_with_force",
+        "tests/test_smart_integration.py::test_smart_rejects_combo_with_staged",
+        "tests/test_smart_integration.py::test_smart_bails_when_no_indexable_files",
+        "tests/test_smart_integration.py::test_smart_dry_run_does_not_modify_filesystem",
+        "tests/test_smart_integration.py::_stub_llm",
+        "tests/test_smart_integration.py::test_smart_repairs_missing_wiki_page",
+        "tests/test_smart_integration.py::test_smart_clean_state_is_noop",
+        "tests/test_smart_integration.py::test_smart_fills_fresh_repo_with_no_manifest",
+        "tests/test_smart_integration.py::test_smart_dry_run_reports_full_initial_index_without_changes",
+        "tests/test_smart_integration.py::test_smart_fills_never_indexed_tracked_file",
+        "tests/test_smart_integration.py::test_smart_dry_run_clean_repo_exits_zero",
+        "tests/test_smart_integration.py::test_smart_dry_run_drift_exits_nonzero"
+      ],
+      "scip": {
+        "tests/test_smart_integration.py::_bootstrap_repo": "tests/test_smart_integration.py/ _bootstrap_repo().",
+        "tests/test_smart_integration.py::test_smart_rejects_combo_with_force": "tests/test_smart_integration.py/ test_smart_rejects_combo_with_force().",
+        "tests/test_smart_integration.py::test_smart_rejects_combo_with_staged": "tests/test_smart_integration.py/ test_smart_rejects_combo_with_staged().",
+        "tests/test_smart_integration.py::test_smart_bails_when_no_indexable_files": "tests/test_smart_integration.py/ test_smart_bails_when_no_indexable_files().",
+        "tests/test_smart_integration.py::test_smart_dry_run_does_not_modify_filesystem": "tests/test_smart_integration.py/ test_smart_dry_run_does_not_modify_filesystem().",
+        "tests/test_smart_integration.py::_stub_llm": "tests/test_smart_integration.py/ _stub_llm().",
+        "tests/test_smart_integration.py::test_smart_repairs_missing_wiki_page": "tests/test_smart_integration.py/ test_smart_repairs_missing_wiki_page().",
+        "tests/test_smart_integration.py::test_smart_clean_state_is_noop": "tests/test_smart_integration.py/ test_smart_clean_state_is_noop().",
+        "tests/test_smart_integration.py::test_smart_fills_fresh_repo_with_no_manifest": "tests/test_smart_integration.py/ test_smart_fills_fresh_repo_with_no_manifest().",
+        "tests/test_smart_integration.py::test_smart_dry_run_reports_full_initial_index_without_changes": "tests/test_smart_integration.py/ test_smart_dry_run_reports_full_initial_index_without_changes().",
+        "tests/test_smart_integration.py::test_smart_fills_never_indexed_tracked_file": "tests/test_smart_integration.py/ test_smart_fills_never_indexed_tracked_file().",
+        "tests/test_smart_integration.py::test_smart_dry_run_clean_repo_exits_zero": "tests/test_smart_integration.py/ test_smart_dry_run_clean_repo_exits_zero().",
+        "tests/test_smart_integration.py::test_smart_dry_run_drift_exits_nonzero": "tests/test_smart_integration.py/ test_smart_dry_run_drift_exits_nonzero()."
+      }
+    },
+    "tests/test_verify.py": {
+      "hash": "sha256:0a4bc297d29b2b0296736d9a41a3cf6f4565d5915dc89a66e1273015e7a3673f",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [
+        "tests/test_verify.py::_make_repo_with_manifest",
+        "tests/test_verify.py::test_empty_report_is_clean",
+        "tests/test_verify.py::test_report_with_stale_files_not_clean",
+        "tests/test_verify.py::test_report_counts_all_drift_classes",
+        "tests/test_verify.py::test_scan_flags_missing_manifest",
+        "tests/test_verify.py::test_scan_detects_stale_files",
+        "tests/test_verify.py::test_scan_detects_dangling_manifest_entries",
+        "tests/test_verify.py::test_scan_detects_untracked_source_files",
+        "tests/test_verify.py::test_scan_detects_missing_wiki_page",
+        "tests/test_verify.py::test_scan_detects_orphan_wiki_page",
+        "tests/test_verify.py::test_scan_detects_missing_index_and_skill",
+        "tests/test_verify.py::_seed_valid_state",
+        "tests/test_verify.py::test_scan_detects_missing_claude_md_snippet",
+        "tests/test_verify.py::test_scan_detects_missing_agents_md_snippet",
+        "tests/test_verify.py::test_scan_agents_md_present_and_valid_not_flagged",
+        "tests/test_verify.py::test_scan_detects_missing_gitignore_entry",
+        "tests/test_verify.py::test_scan_detects_hook_drift",
+        "tests/test_verify.py::test_scan_detects_pages_missing_deep_sections",
+        "tests/test_verify.py::test_scan_deep_page_with_empty_narrative_not_flagged",
+        "tests/test_verify.py::test_scan_skips_deep_check_when_skip_deep_true",
+        "tests/test_verify.py::test_print_report_clean",
+        "tests/test_verify.py::test_print_report_lists_each_drift",
+        "tests/test_verify.py::test_scan_skips_hook_check_when_check_hook_false"
+      ],
+      "scip": {
+        "tests/test_verify.py::_make_repo_with_manifest": "tests/test_verify.py/ _make_repo_with_manifest().",
+        "tests/test_verify.py::test_empty_report_is_clean": "tests/test_verify.py/ test_empty_report_is_clean().",
+        "tests/test_verify.py::test_report_with_stale_files_not_clean": "tests/test_verify.py/ test_report_with_stale_files_not_clean().",
+        "tests/test_verify.py::test_report_counts_all_drift_classes": "tests/test_verify.py/ test_report_counts_all_drift_classes().",
+        "tests/test_verify.py::test_scan_flags_missing_manifest": "tests/test_verify.py/ test_scan_flags_missing_manifest().",
+        "tests/test_verify.py::test_scan_detects_stale_files": "tests/test_verify.py/ test_scan_detects_stale_files().",
+        "tests/test_verify.py::test_scan_detects_dangling_manifest_entries": "tests/test_verify.py/ test_scan_detects_dangling_manifest_entries().",
+        "tests/test_verify.py::test_scan_detects_untracked_source_files": "tests/test_verify.py/ test_scan_detects_untracked_source_files().",
+        "tests/test_verify.py::test_scan_detects_missing_wiki_page": "tests/test_verify.py/ test_scan_detects_missing_wiki_page().",
+        "tests/test_verify.py::test_scan_detects_orphan_wiki_page": "tests/test_verify.py/ test_scan_detects_orphan_wiki_page().",
+        "tests/test_verify.py::test_scan_detects_missing_index_and_skill": "tests/test_verify.py/ test_scan_detects_missing_index_and_skill().",
+        "tests/test_verify.py::_seed_valid_state": "tests/test_verify.py/ _seed_valid_state().",
+        "tests/test_verify.py::test_scan_detects_missing_claude_md_snippet": "tests/test_verify.py/ test_scan_detects_missing_claude_md_snippet().",
+        "tests/test_verify.py::test_scan_detects_missing_agents_md_snippet": "tests/test_verify.py/ test_scan_detects_missing_agents_md_snippet().",
+        "tests/test_verify.py::test_scan_agents_md_present_and_valid_not_flagged": "tests/test_verify.py/ test_scan_agents_md_present_and_valid_not_flagged().",
+        "tests/test_verify.py::test_scan_detects_missing_gitignore_entry": "tests/test_verify.py/ test_scan_detects_missing_gitignore_entry().",
+        "tests/test_verify.py::test_scan_detects_hook_drift": "tests/test_verify.py/ test_scan_detects_hook_drift().",
+        "tests/test_verify.py::test_scan_detects_pages_missing_deep_sections": "tests/test_verify.py/ test_scan_detects_pages_missing_deep_sections().",
+        "tests/test_verify.py::test_scan_deep_page_with_empty_narrative_not_flagged": "tests/test_verify.py/ test_scan_deep_page_with_empty_narrative_not_flagged().",
+        "tests/test_verify.py::test_scan_skips_deep_check_when_skip_deep_true": "tests/test_verify.py/ test_scan_skips_deep_check_when_skip_deep_true().",
+        "tests/test_verify.py::test_print_report_clean": "tests/test_verify.py/ test_print_report_clean().",
+        "tests/test_verify.py::test_print_report_lists_each_drift": "tests/test_verify.py/ test_print_report_lists_each_drift().",
+        "tests/test_verify.py::test_scan_skips_hook_check_when_check_hook_false": "tests/test_verify.py/ test_scan_skips_hook_check_when_check_hook_false()."
+      }
+    },
+    "tests/test_wiki.py": {
+      "hash": "sha256:0f862875ae2decff2c9fb233ce67cf33dc95d357bc8b291f79543a12b8c6486b",
+      "wiki_page": "wiki/tests.md",
+      "component_ids": [
+        "tests/test_wiki.py::_make_node",
+        "tests/test_wiki.py::test_build_page_contains_symbol",
+        "tests/test_wiki.py::test_build_page_contains_calls",
+        "tests/test_wiki.py::test_build_page_contains_called_by",
+        "tests/test_wiki.py::test_build_page_no_agent_hints",
+        "tests/test_wiki.py::test_build_index_contains_page",
+        "tests/test_wiki.py::test_write_page_creates_file",
+        "tests/test_wiki.py::_parse_frontmatter",
+        "tests/test_wiki.py::test_page_starts_with_frontmatter_delimiter",
+        "tests/test_wiki.py::test_page_frontmatter_is_valid_yaml_with_required_type",
+        "tests/test_wiki.py::test_page_frontmatter_title_and_resource",
+        "tests/test_wiki.py::test_page_frontmatter_tags_from_path_segments",
+        "tests/test_wiki.py::test_page_frontmatter_timestamp_passed_in_not_computed",
+        "tests/test_wiki.py::test_page_frontmatter_description_from_narrative_first_sentence",
+        "tests/test_wiki.py::test_page_frontmatter_description_generic_when_no_narrative",
+        "tests/test_wiki.py::test_page_body_sections_preserved_below_frontmatter",
+        "tests/test_wiki.py::test_index_frontmatter_has_okf_version",
+        "tests/test_wiki.py::test_page_renders_relationships_block_per_symbol",
+        "tests/test_wiki.py::test_page_relationships_block_caps_long_lists",
+        "tests/test_wiki.py::test_index_renders_core_abstractions",
+        "tests/test_wiki.py::test_page_basename_root_group",
+        "tests/test_wiki.py::test_page_basename_nested_group",
+        "tests/test_wiki.py::test_page_relpath_matches_write_page"
+      ],
+      "scip": {
+        "tests/test_wiki.py::_make_node": "tests/test_wiki.py/ _make_node().",
+        "tests/test_wiki.py::test_build_page_contains_symbol": "tests/test_wiki.py/ test_build_page_contains_symbol().",
+        "tests/test_wiki.py::test_build_page_contains_calls": "tests/test_wiki.py/ test_build_page_contains_calls().",
+        "tests/test_wiki.py::test_build_page_contains_called_by": "tests/test_wiki.py/ test_build_page_contains_called_by().",
+        "tests/test_wiki.py::test_build_page_no_agent_hints": "tests/test_wiki.py/ test_build_page_no_agent_hints().",
+        "tests/test_wiki.py::test_build_index_contains_page": "tests/test_wiki.py/ test_build_index_contains_page().",
+        "tests/test_wiki.py::test_write_page_creates_file": "tests/test_wiki.py/ test_write_page_creates_file().",
+        "tests/test_wiki.py::_parse_frontmatter": "tests/test_wiki.py/ _parse_frontmatter().",
+        "tests/test_wiki.py::test_page_starts_with_frontmatter_delimiter": "tests/test_wiki.py/ test_page_starts_with_frontmatter_delimiter().",
+        "tests/test_wiki.py::test_page_frontmatter_is_valid_yaml_with_required_type": "tests/test_wiki.py/ test_page_frontmatter_is_valid_yaml_with_required_type().",
+        "tests/test_wiki.py::test_page_frontmatter_title_and_resource": "tests/test_wiki.py/ test_page_frontmatter_title_and_resource().",
+        "tests/test_wiki.py::test_page_frontmatter_tags_from_path_segments": "tests/test_wiki.py/ test_page_frontmatter_tags_from_path_segments().",
+        "tests/test_wiki.py::test_page_frontmatter_timestamp_passed_in_not_computed": "tests/test_wiki.py/ test_page_frontmatter_timestamp_passed_in_not_computed().",
+        "tests/test_wiki.py::test_page_frontmatter_description_from_narrative_first_sentence": "tests/test_wiki.py/ test_page_frontmatter_description_from_narrative_first_sentence().",
+        "tests/test_wiki.py::test_page_frontmatter_description_generic_when_no_narrative": "tests/test_wiki.py/ test_page_frontmatter_description_generic_when_no_narrative().",
+        "tests/test_wiki.py::test_page_body_sections_preserved_below_frontmatter": "tests/test_wiki.py/ test_page_body_sections_preserved_below_frontmatter().",
+        "tests/test_wiki.py::test_index_frontmatter_has_okf_version": "tests/test_wiki.py/ test_index_frontmatter_has_okf_version().",
+        "tests/test_wiki.py::test_page_renders_relationships_block_per_symbol": "tests/test_wiki.py/ test_page_renders_relationships_block_per_symbol().",
+        "tests/test_wiki.py::test_page_relationships_block_caps_long_lists": "tests/test_wiki.py/ test_page_relationships_block_caps_long_lists().",
+        "tests/test_wiki.py::test_index_renders_core_abstractions": "tests/test_wiki.py/ test_index_renders_core_abstractions().",
+        "tests/test_wiki.py::test_page_basename_root_group": "tests/test_wiki.py/ test_page_basename_root_group().",
+        "tests/test_wiki.py::test_page_basename_nested_group": "tests/test_wiki.py/ test_page_basename_nested_group().",
+        "tests/test_wiki.py::test_page_relpath_matches_write_page": "tests/test_wiki.py/ test_page_relpath_matches_write_page()."
+      }
+    }
+  }
+}

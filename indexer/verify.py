@@ -63,7 +63,7 @@ class VerifyReport:
         return self.total_issues() == 0
 
 
-def scan(root: Path, cfg: Config, manifest: Manifest, skip_deep: bool = False) -> VerifyReport:
+def scan(root: Path, cfg: Config, manifest: Manifest, skip_deep: bool = False, check_hook: bool = True) -> VerifyReport:
     """
     Verify the state of generated artifacts against the manifest and filesystem.
     Deterministic: no LLM, no re-parse.
@@ -134,8 +134,10 @@ def scan(root: Path, cfg: Config, manifest: Manifest, skip_deep: bool = False) -
     else:
         report.gitignore_entry_missing = True
 
-    # Pre-commit hook
-    if cfg.pre_commit and is_git_repo(root):
+    # Pre-commit hook. Lives in .git/hooks (not committed, absent on fresh CI
+    # checkouts), so a committed-tree drift-gate passes check_hook=False to skip
+    # it — otherwise it would always fail in CI for everyone.
+    if check_hook and cfg.pre_commit and is_git_repo(root):
         hook_path = root / ".git" / "hooks" / "pre-commit"
         if not hook_path.exists() or HOOK_MARKER not in hook_path.read_text():
             report.hook_drift = True
