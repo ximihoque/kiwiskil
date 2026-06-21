@@ -17,6 +17,7 @@ class Config:
     ])
     max_tokens_per_batch: int = 8000
     merge_threshold: int = 2
+    map_tokens: int = 1024  # token budget for the ranked repo-map spine
     pre_commit: bool = True
     synthesize_commit_message: bool = True
     deep_hook: bool = True
@@ -38,6 +39,7 @@ def load_config(repo_root: Path) -> Config:
         ignore=list(idx.get("ignore", defaults.ignore)),
         max_tokens_per_batch=idx.get("max_tokens_per_batch", defaults.max_tokens_per_batch),
         merge_threshold=idx.get("merge_threshold", defaults.merge_threshold),
+        map_tokens=idx.get("map_tokens", defaults.map_tokens),
         pre_commit=hooks.get("pre_commit", defaults.pre_commit),
         synthesize_commit_message=hooks.get("synthesize_commit_message", defaults.synthesize_commit_message),
         deep_hook=hooks.get("deep", defaults.deep_hook),
@@ -46,7 +48,7 @@ def load_config(repo_root: Path) -> Config:
 def save_config(repo_root: Path, cfg: Config) -> None:
     data = {
         "llm": {"provider": cfg.provider, "api_key_env": cfg.api_key_env},
-        "indexer": {"wiki_dir": cfg.wiki_dir, "ignore": cfg.ignore, "max_tokens_per_batch": cfg.max_tokens_per_batch, "merge_threshold": cfg.merge_threshold},
+        "indexer": {"wiki_dir": cfg.wiki_dir, "ignore": cfg.ignore, "max_tokens_per_batch": cfg.max_tokens_per_batch, "merge_threshold": cfg.merge_threshold, "map_tokens": cfg.map_tokens},
         "hooks": {"pre_commit": cfg.pre_commit, "synthesize_commit_message": cfg.synthesize_commit_message, "deep": cfg.deep_hook},
     }
     with open(repo_root / FILENAME, "wb") as f:

@@ -1,4 +1,10 @@
+---
+{{ frontmatter }}
+---
 # {{ group_label }}/
+{% if deep %}
+<!-- kiwiskil:deep -->
+{% endif %}
 {% if narrative %}
 
 ## Overview
@@ -18,6 +24,18 @@
 {% for node in nodes -%}
 | `{{ node.id }}` | {{ node.type }} | {{ descriptions.get(node.id, "") }} |
 {% endfor %}
+{% if relationships %}
+## Symbol Relationships
+{% for r in relationships %}
+### `{{ r.symbol }}`
+- **Callers ({{ r.callers_count }}):** {% if r.callers_shown %}{{ r.callers_shown | join(", ") }}{% if r.callers_more %} … (+{{ r.callers_more }} more){% endif %}{% else %}none{% endif %}
+
+- **Calls:** {% if r.calls_shown %}{{ r.calls_shown | join(", ") }}{% if r.calls_more %} … (+{{ r.calls_more }} more){% endif %}{% else %}none{% endif %}
+
+- **Editing this affects:** {% if r.affected_shown %}{{ r.affected_shown | join(", ") }}{% if r.affected_more %} … (+{{ r.affected_more }} more){% endif %}{% else %}none{% endif %}
+
+{% endfor %}
+{% endif %}
 {% if data_flows %}
 ## Data Flows
 {% for flow in data_flows -%}

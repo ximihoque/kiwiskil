@@ -59,11 +59,22 @@ def _get_class_method_ids(tree: ast.Module) -> set[int]:
 def parse_file(path: Path, repo_root: Path) -> list[ASTNode]:
     """Parse a Python file and return ASTNode list. Returns [] on syntax error."""
     suffix = path.suffix.lower()
-    
+
     if suffix in {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}:
         from indexer.js_parser import parse_js_file
         return parse_js_file(path, repo_root)
-    
+
+    # Config-driven tree-sitter extraction for Go / Java / Ruby / Rust.
+    from indexer.ts_extract import LANG_CONFIGS, extract_generic
+    cfg = LANG_CONFIGS.get(suffix)
+    if cfg is not None:
+        return extract_generic(path, repo_root, cfg, _rel)
+
+    if suffix != ".py":
+        # Unknown/unsupported suffix: nothing to extract (matches prior behaviour
+        # of returning [] rather than feeding non-Python source to ast.parse).
+        return []
+
     try:
         source = path.read_text(encoding="utf-8", errors="replace")
         tree = ast.parse(source)

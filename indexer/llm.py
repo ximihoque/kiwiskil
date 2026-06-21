@@ -1,14 +1,150 @@
 # indexer/llm.py
 from __future__ import annotations
-import json, os, time
+import json, os, shutil, subprocess, time
 from indexer.ast_parser import ASTNode
 from indexer.config import Config
 
 _ANTHROPIC_MODELS = {"claude", "anthropic"}
 
+# High-volume per-symbol/per-file description calls use a cheap, fast model;
+# the handful of deep-enrichment prose calls (system overview, flows, narrative)
+# use the configured/heavier model for readability. Keeps a subscriber's quota
+# light while still producing a good HLD narrative.
+_CLI_CHEAP_MODEL = "claude-haiku-4-5"
+
 
 def _is_anthropic(cfg: Config) -> bool:
     return any(cfg.provider.startswith(p) for p in _ANTHROPIC_MODELS)
+
+
+def _claude_cli_path() -> str | None:
+    """Path to the logged-in `claude` CLI if it's on PATH, else None.
+
+    This is the "use existing Claude, no API key" path: a Claude Code / Claude
+    subscriber has `claude` installed and authenticated via OAuth, so we can run
+    it headlessly (`claude -p`) without any ANTHROPIC_API_KEY.
+    """
+    return shutil.which("claude")
+
+
+def _claude_cli_completion(model: str, system: str, user: str) -> str:
+    """One-shot completion via the logged-in `claude` CLI (no API key).
+
+    Runs `claude -p --system-prompt <system> --model <model>` with the user
+    content on stdin and returns stdout. Raises on non-zero exit so callers can
+    fall back to structural-only output.
+    """
+    claude = _claude_cli_path()
+    if not claude:
+        raise RuntimeError("claude CLI not found on PATH")
+    bare_model = model.removeprefix("anthropic/")
+    # The CLI runs as an agent and tends to add a prose preamble; nudge it to
+    # emit only the payload. (_clean_json tolerates preamble anyway, as a belt.)
+    cli_system = system + (
+        " IMPORTANT: output ONLY the requested content (raw JSON if JSON was "
+        "asked for). No preamble, no explanation, no markdown fences."
+    )
+    proc = subprocess.run(
+        [claude, "-p", "--system-prompt", cli_system, "--model", bare_model],
+        input=user,
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(f"claude CLI failed (exit {proc.returncode}): {proc.stderr.strip()[:200]}")
+    return proc.stdout
+
+
+def _complete(system: str, user: str, cfg: Config, *, deep: bool = False) -> str:
+    """Single provider dispatcher for every LLM call. Priority:
+
+      1. Explicit API key (env var or inline)  -> Anthropic SDK / LiteLLM.
+      2. Anthropic provider + no key + `claude` CLI on PATH -> the CLI (free for
+         logged-in Claude subscribers).
+      3. Neither -> raise; public functions catch it and emit structural-only.
+
+    `deep=True` marks the few prose-quality enrichment calls: under the CLI path
+    they use the configured (heavier) model; the high-volume calls use a cheap
+    model. With an explicit key, the configured model/provider is used as-is.
+    """
+    api_key = _resolve_api_key(cfg)
+
+    if api_key is not None:
+        if _is_anthropic(cfg):
+            return _anthropic_completion(cfg.provider, system, user, api_key)
+        import litellm
+        response = litellm.completion(
+            model=cfg.provider,
+            api_key=api_key,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+        )
+        return response.choices[0].message.content
+
+    # No API key. Try the logged-in claude CLI (Anthropic providers only).
+    if _is_anthropic(cfg) and _claude_cli_path():
+        model = cfg.provider if deep else _CLI_CHEAP_MODEL
+        return _claude_cli_completion(model, system, user)
+
+    raise RuntimeError(
+        "No LLM credentials: set an API key, or install + log in to the `claude` CLI."
+    )
+
+
+def _clean_json(raw: str):
+    """Parse JSON from a model response, tolerating preamble and fences.
+
+    Raw-API responses are usually clean JSON, but the `claude` CLI runs as an
+    agent and may wrap the JSON in a prose preamble and/or a ```json fence
+    (e.g. "Here is the requested JSON:\\n```json\\n{...}\\n```"). We therefore:
+      1. try the fast path (strip outer fences, parse);
+      2. else extract a fenced ```json/``` block if present;
+      3. else slice from the first {/[ to its matching close and parse that.
+    Raises json.JSONDecodeError if nothing parses.
+    """
+    s = raw.strip()
+    fast = s.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+    try:
+        return json.loads(fast)
+    except json.JSONDecodeError:
+        pass
+
+    # Fenced block anywhere in the text.
+    if "```" in s:
+        import re
+        m = re.search(r"```(?:json)?\s*(.+?)\s*```", s, re.DOTALL)
+        if m:
+            try:
+                return json.loads(m.group(1).strip())
+            except json.JSONDecodeError:
+                pass
+
+    # First balanced {...} or [...] span — whichever bracket appears FIRST in the
+    # string (so a list payload isn't mis-sliced to an inner object, and vice versa).
+    obj_at = s.find("{")
+    arr_at = s.find("[")
+    candidates = []
+    if obj_at != -1:
+        candidates.append((obj_at, "{", "}"))
+    if arr_at != -1:
+        candidates.append((arr_at, "[", "]"))
+    candidates.sort()  # by position
+    for start, open_ch, close_ch in candidates:
+        depth = 0
+        for i in range(start, len(s)):
+            if s[i] == open_ch:
+                depth += 1
+            elif s[i] == close_ch:
+                depth -= 1
+                if depth == 0:
+                    try:
+                        return json.loads(s[start:i + 1])
+                    except json.JSONDecodeError:
+                        break
+    # Nothing parsed — re-raise via a final strict attempt.
+    return json.loads(fast)
 
 
 def _resolve_api_key(cfg: Config) -> str | None:
@@ -57,9 +193,6 @@ def describe_nodes(nodes: list[ASTNode], cfg: Config) -> dict[str, str]:
     - provider starts with "anthropic/" or "claude"
     - api_key_env is empty
     """
-    api_key = _resolve_api_key(cfg)
-    use_sdk = _is_anthropic(cfg) and api_key is None
-
     prompt_items = [
         {
             "id": n.id,
@@ -85,26 +218,8 @@ def describe_nodes(nodes: list[ASTNode], cfg: Config) -> dict[str, str]:
     user = json.dumps(prompt_items)
 
     try:
-        # time.sleep(2)
-        if use_sdk:
-            raw = _anthropic_completion(cfg.provider, system, user, api_key)
-        else:
-            import litellm
-            response = litellm.completion(
-                model=cfg.provider,
-                api_key=api_key,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-            )
-            raw = response.choices[0].message.content
-
-        # raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-        # result = json.loads(raw)
-        # return {n.id: result.get(n.id, "") for n in nodes}
-        raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-        result = json.loads(raw)
+        raw = _complete(system, user, cfg)
+        result = _clean_json(raw)
         if isinstance(result, list):
             result = {item["id"]: item.get("description", item.get("desc", "")) for item in result if isinstance(item, dict) and "id" in item}
         return {n.id: result.get(n.id, "") for n in nodes}
@@ -122,9 +237,6 @@ def describe_files(file_nodes: dict[str, list[ASTNode]], cfg: Config) -> dict[st
     file_nodes: dict mapping rel_path -> list of ASTNodes in that file.
     Returns dict mapping rel_path -> one-line purpose string.
     """
-    api_key = _resolve_api_key(cfg)
-    use_sdk = _is_anthropic(cfg) and api_key is None
-
     prompt_items = [
         {
             "file": rel_path,
@@ -148,22 +260,8 @@ def describe_files(file_nodes: dict[str, list[ASTNode]], cfg: Config) -> dict[st
     user = json.dumps(prompt_items)
 
     try:
-        if use_sdk:
-            raw = _anthropic_completion(cfg.provider, system, user, api_key)
-        else:
-            import litellm
-            response = litellm.completion(
-                model=cfg.provider,
-                api_key=api_key,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-            )
-            raw = response.choices[0].message.content
-
-        raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-        result = json.loads(raw)
+        raw = _complete(system, user, cfg)
+        result = _clean_json(raw)
         return {f: result.get(f, "") for f in file_nodes}
     except Exception as e:
         if isinstance(e, (TypeError, AttributeError, ImportError, NameError)):
@@ -188,9 +286,6 @@ def deep_enrich_page(
 
     Falls back to empty values on any error.
     """
-    api_key = _resolve_api_key(cfg)
-    use_sdk = _is_anthropic(cfg) and api_key is None
-
     symbol_summary = [
         {"id": n.id, "type": n.type, "desc": descriptions.get(n.id, ""), "calls": n.calls[:8]}
         for n in nodes
@@ -224,22 +319,8 @@ def deep_enrich_page(
     empty = {"narrative": "", "data_flows": [], "constraints": []}
 
     try:
-        if use_sdk:
-            raw = _anthropic_completion(cfg.provider, system, user, api_key)
-        else:
-            import litellm
-            response = litellm.completion(
-                model=cfg.provider,
-                api_key=api_key,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-            )
-            raw = response.choices[0].message.content
-
-        raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-        result = json.loads(raw)
+        raw = _complete(system, user, cfg, deep=True)
+        result = _clean_json(raw)
         return {
             "narrative": result.get("narrative", ""),
             "data_flows": result.get("data_flows", []),
@@ -262,9 +343,6 @@ def deep_enrich_index(
     pages: list of {"label": str, "covers": str, "entry_points": list[str]}
     Returns {"overview": str, "flows": list[str]}
     """
-    api_key = _resolve_api_key(cfg)
-    use_sdk = _is_anthropic(cfg) and api_key is None
-
     system = (
         "You are a senior engineer writing a codebase overview for an AI agent. "
         "Be dense and specific. No fluff."
@@ -284,22 +362,8 @@ def deep_enrich_index(
     empty = {"overview": "", "flows": []}
 
     try:
-        if use_sdk:
-            raw = _anthropic_completion(cfg.provider, system, user, api_key)
-        else:
-            import litellm
-            response = litellm.completion(
-                model=cfg.provider,
-                api_key=api_key,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-            )
-            raw = response.choices[0].message.content
-
-        raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-        result = json.loads(raw)
+        raw = _complete(system, user, cfg, deep=True)
+        result = _clean_json(raw)
         return {
             "overview": result.get("overview", ""),
             "flows": result.get("flows", []),
@@ -317,9 +381,6 @@ def synthesize_commit_message(changed_files: list[str], descriptions: dict[str, 
     Generate a one-line commit message from changed files and symbol descriptions.
     Returns empty string on any error.
     """
-    api_key = _resolve_api_key(cfg)
-    use_sdk = _is_anthropic(cfg) and api_key is None
-
     system = (
         "Write a single git commit message (max 72 chars) summarising the code changes. "
         "No conventional commit prefix. No markdown. Just the message text."
@@ -327,20 +388,7 @@ def synthesize_commit_message(changed_files: list[str], descriptions: dict[str, 
     user = json.dumps({"changed_files": changed_files, "symbols": descriptions})
 
     try:
-        if use_sdk:
-            raw = _anthropic_completion(cfg.provider, system, user, api_key)
-        else:
-            import litellm
-            response = litellm.completion(
-                model=cfg.provider,
-                api_key=api_key,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-            )
-            raw = response.choices[0].message.content
-
+        raw = _complete(system, user, cfg)
         return raw.strip()[:72]
     except Exception as e:
         if isinstance(e, (TypeError, AttributeError, ImportError, NameError)):

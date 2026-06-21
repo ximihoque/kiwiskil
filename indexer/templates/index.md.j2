@@ -1,3 +1,6 @@
+---
+{{ frontmatter }}
+---
 # Codebase Index
 {% if overview %}
 
@@ -10,6 +13,20 @@
 {% for flow in flows -%}
 - {{ flow }}
 {% endfor %}
+{% endif %}
+{% if core_abstractions %}
+
+## Core abstractions
+The highest-connectivity symbols (most callers + callees) — likely the load-bearing parts of the system:
+{% for label, full_id, degree in core_abstractions -%}
+- `{{ full_id }}` — degree {{ degree }}
+{% endfor %}
+{% endif %}
+{% if repo_map %}
+
+## Repo Map
+Symbols ranked by importance (PageRank over the call graph), most load-bearing first. Read these to orient before diving into any page:
+{{ repo_map }}
 {% endif %}
 
 ## Structure

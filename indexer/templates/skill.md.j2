@@ -35,6 +35,14 @@ The wiki captures structure, relationships, and constraints in a fraction of the
 - {{ flow }}
 {% endfor %}
 {% endif %}
+{% if repo_map %}
+
+## Repo Map (ranked by importance)
+
+The most load-bearing symbols first (PageRank over the call graph). Start here to orient before reading any wiki page or source file:
+
+{{ repo_map }}
+{% endif %}
 
 ## Wiki Pages
 

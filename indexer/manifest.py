@@ -11,6 +11,11 @@ class FileEntry:
     hash: str
     wiki_page: str
     component_ids: list[str]
+    # Additive SCIP interop: maps each component_id -> its SCIP descriptor
+    # string (see indexer.scip). The primary key stays component_ids; this is
+    # extra metadata for SCIP-aware consumers. Optional/back-compatible: older
+    # manifests without it load fine and default to {}.
+    scip: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class Manifest:
@@ -34,6 +39,23 @@ def compute_hash(path: Path) -> str:
     h = hashlib.sha256(path.read_bytes()).hexdigest()
     return f"sha256:{h}"
 
+
+def file_entry_for(file_hash: str, wiki_page: str, file_nodes: list) -> "FileEntry":
+    """Build a FileEntry for one source file from its ASTNodes.
+
+    Single source of truth for both `kiwiskil run` and `--smart` repair so the
+    manifest (primary component_ids + additive SCIP descriptors) is always
+    constructed identically. `file_nodes` are the ASTNodes whose .file == this
+    file.
+    """
+    from indexer.scip import scip_symbol
+    return FileEntry(
+        hash=file_hash,
+        wiki_page=wiki_page,
+        component_ids=[n.id for n in file_nodes],
+        scip={n.id: scip_symbol(n) for n in file_nodes},
+    )
+
 def load_manifest(repo_root: Path) -> Manifest:
     path = repo_root / MANIFEST_PATH
     if not path.exists():
@@ -44,6 +66,7 @@ def load_manifest(repo_root: Path) -> Manifest:
             hash=v["hash"],
             wiki_page=v["wiki_page"],
             component_ids=v.get("component_ids", []),
+            scip=v.get("scip", {}),
         )
         for k, v in data.get("files", {}).items()
     }

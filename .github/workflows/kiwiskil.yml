@@ -1,0 +1,51 @@
+# kiwiskil drift-gate
+#
+# Fails the build when the committed index (wiki/, .indexer/manifest.json,
+# skill file) has drifted from the source tree, or was never generated.
+#
+# How it works:
+#   `kiwiskil run --smart --dry-run` performs a DETERMINISTIC verify pass
+#   (no LLM, no re-parse) and exits non-zero whenever drift is found:
+#     - source files changed but their wiki pages are stale,
+#     - tracked source files that were never indexed,
+#     - missing/orphan wiki pages, missing INDEX or skill file,
+#     - or no index at all (a full initial index is needed).
+#   A clean repo exits 0. Because the dry-run never calls the LLM, this job
+#   runs WITHOUT an ANTHROPIC_API_KEY — the secret is wired through only so a
+#   future non-dry-run repair step could reuse this workflow if desired.
+name: kiwiskil drift-gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  drift-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history so the verify pass can resolve commits if needed.
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install kiwiskil
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+
+      - name: Verify index is up to date (drift-gate)
+        # Deterministic — no LLM required. Exits non-zero on any drift,
+        # which fails this step and therefore the build.
+        env:
+          # Present-or-absent: the dry-run never needs it. Wired for parity
+          # with non-dry-run flows that would actually call the LLM.
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          kiwiskil run --smart --dry-run
