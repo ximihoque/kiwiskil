@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" width="1000" height="400" font-family="'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif">
+
+  <!-- Background: near-black, Vercel-classic -->
+  <rect width="1000" height="400" fill="#0a0a0a"/>
+
+  <!-- Subtle top hairline + faint radial glow behind the mark for depth -->
+  <defs>
+    <radialGradient id="glow" cx="33%" cy="50%" r="38%">
+      <stop offset="0%" stop-color="#1b2a17" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#0a0a0a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1000" height="400" fill="url(#glow)"/>
+  <rect x="0" y="0" width="1000" height="1" fill="#ffffff" opacity="0.06"/>
+
+  <!-- ── Kiwi mark (left), scaled from logo.svg: 120→168px, centred at (250,200) ── -->
+  <g transform="translate(166,116) scale(1.4)">
+    <circle cx="60" cy="60" r="54" fill="#6b3f1f"/>
+    <circle cx="60" cy="60" r="47" fill="#8a5230"/>
+    <circle cx="60" cy="60" r="41" fill="#4a7c3f"/>
+    <circle cx="60" cy="60" r="33" fill="#62a050"/>
+    <circle cx="60" cy="60" r="14" fill="#f2ede0"/>
+    <circle cx="60" cy="60" r="9" fill="#e4dccb"/>
+    <circle cx="60" cy="60" r="4" fill="#cec4b0"/>
+    <!-- Flesh rays -->
+    <g stroke="#3d6b33" stroke-width="1.2" opacity="0.6">
+      <line x1="60" y1="60" x2="60" y2="19"/>
+      <line x1="60" y1="60" x2="60" y2="19" transform="rotate(45 60 60)"/>
+      <line x1="60" y1="60" x2="60" y2="19" transform="rotate(90 60 60)"/>
+      <line x1="60" y1="60" x2="60" y2="19" transform="rotate(135 60 60)"/>
+      <line x1="60" y1="60" x2="60" y2="19" transform="rotate(180 60 60)"/>
+      <line x1="60" y1="60" x2="60" y2="19" transform="rotate(225 60 60)"/>
+      <line x1="60" y1="60" x2="60" y2="19" transform="rotate(270 60 60)"/>
+      <line x1="60" y1="60" x2="60" y2="19" transform="rotate(315 60 60)"/>
+    </g>
+    <!-- Seeds -->
+    <g fill="#1e1008">
+      <ellipse cx="60" cy="33" rx="3.2" ry="5" transform="rotate(0 60 60)"/>
+      <ellipse cx="60" cy="33" rx="3.2" ry="5" transform="rotate(45 60 60)"/>
+      <ellipse cx="60" cy="33" rx="3.2" ry="5" transform="rotate(90 60 60)"/>
+      <ellipse cx="60" cy="33" rx="3.2" ry="5" transform="rotate(135 60 60)"/>
+      <ellipse cx="60" cy="33" rx="3.2" ry="5" transform="rotate(180 60 60)"/>
+      <ellipse cx="60" cy="33" rx="3.2" ry="5" transform="rotate(225 60 60)"/>
+      <ellipse cx="60" cy="33" rx="3.2" ry="5" transform="rotate(270 60 60)"/>
+      <ellipse cx="60" cy="33" rx="3.2" ry="5" transform="rotate(315 60 60)"/>
+    </g>
+  </g>
+
+  <!-- ── Wordmark + tagline (right of mark) ── -->
+  <!-- Wordmark: white, tight tracking, optically centred against the mark -->
+  <text x="392" y="196" font-size="76" font-weight="800" fill="#ffffff" letter-spacing="-2">kiwiskil</text>
+  <!-- Tagline: muted gray, lighter weight -->
+  <text x="396" y="240" font-size="23" font-weight="400" fill="#8f8f8f" letter-spacing="0.2">Your codebase, understood by any LLM.</text>
+
+</svg>
