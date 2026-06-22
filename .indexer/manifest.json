@@ -1,6 +1,6 @@
 {
-  "last_indexed_commit": "b950860bb04e52f69692358bb14dd59055cf805c",
-  "indexed_at": "2026-06-21T20:10:14.769093+00:00",
+  "last_indexed_commit": "8a10bfcbb107480b1347b31d82199d22383ca1b0",
+  "indexed_at": "2026-06-22T09:08:43.648962+00:00",
   "files": {
     "indexer/__init__.py": {
       "hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -35,7 +35,7 @@
       }
     },
     "indexer/cli.py": {
-      "hash": "sha256:57c7dda60ccd5315da10b7dcbed46aa3a3a5e7d7540fbf7322fc3567f315640a",
+      "hash": "sha256:7a9f7f6d8d7dc6865a34d86f051aebc1061262c26a3bf3d250d45e18aceac4a1",
       "wiki_page": "wiki/indexer.md",
       "component_ids": [
         "indexer/cli.py::_ensure_nav_guidance",
@@ -50,6 +50,7 @@
         "indexer/cli.py::_is_indexable",
         "indexer/cli.py::_index_files",
         "indexer/cli.py::_finalise_index_and_skill",
+        "indexer/cli.py::_prune_deleted",
         "indexer/cli.py::_index_and_persist",
         "indexer/cli.py::_run_smart"
       ],
@@ -66,6 +67,7 @@
         "indexer/cli.py::_is_indexable": "indexer/cli.py/ _is_indexable().",
         "indexer/cli.py::_index_files": "indexer/cli.py/ _index_files().",
         "indexer/cli.py::_finalise_index_and_skill": "indexer/cli.py/ _finalise_index_and_skill().",
+        "indexer/cli.py::_prune_deleted": "indexer/cli.py/ _prune_deleted().",
         "indexer/cli.py::_index_and_persist": "indexer/cli.py/ _index_and_persist().",
         "indexer/cli.py::_run_smart": "indexer/cli.py/ _run_smart()."
       }
@@ -353,7 +355,7 @@
       }
     },
     "indexer/wiki.py": {
-      "hash": "sha256:29646497276ebd26c53401a0e526dc55eedbf0a481d90efa42e3269cd570bc28",
+      "hash": "sha256:d3810022d3d5305d0a0d09e938d350ee794164454e972fd10a8b0d421c30a9d9",
       "wiki_page": "wiki/indexer.md",
       "component_ids": [
         "indexer/wiki.py::PageContext",
@@ -370,6 +372,7 @@
         "indexer/wiki.py::page_basename",
         "indexer/wiki.py::page_relpath",
         "indexer/wiki.py::write_page",
+        "indexer/wiki.py::delete_orphan_pages",
         "indexer/wiki.py::write_index"
       ],
       "scip": {
@@ -387,6 +390,7 @@
         "indexer/wiki.py::page_basename": "indexer/wiki.py/ page_basename().",
         "indexer/wiki.py::page_relpath": "indexer/wiki.py/ page_relpath().",
         "indexer/wiki.py::write_page": "indexer/wiki.py/ write_page().",
+        "indexer/wiki.py::delete_orphan_pages": "indexer/wiki.py/ delete_orphan_pages().",
         "indexer/wiki.py::write_index": "indexer/wiki.py/ write_index()."
       }
     },
@@ -835,7 +839,7 @@
       }
     },
     "tests/test_smart_integration.py": {
-      "hash": "sha256:284f5cc6f1321d197943d50d932e614bc2c417110f32441f2cc036ab51dd1540",
+      "hash": "sha256:d2cbd592098589722c8137689f7fab162779f1837e49f3f2aa32ba24d8536f5a",
       "wiki_page": "wiki/tests.md",
       "component_ids": [
         "tests/test_smart_integration.py::_bootstrap_repo",
@@ -850,7 +854,8 @@
         "tests/test_smart_integration.py::test_smart_dry_run_reports_full_initial_index_without_changes",
         "tests/test_smart_integration.py::test_smart_fills_never_indexed_tracked_file",
         "tests/test_smart_integration.py::test_smart_dry_run_clean_repo_exits_zero",
-        "tests/test_smart_integration.py::test_smart_dry_run_drift_exits_nonzero"
+        "tests/test_smart_integration.py::test_smart_dry_run_drift_exits_nonzero",
+        "tests/test_smart_integration.py::test_run_deletes_orphan_page_when_source_deleted"
       ],
       "scip": {
         "tests/test_smart_integration.py::_bootstrap_repo": "tests/test_smart_integration.py/ _bootstrap_repo().",
@@ -865,7 +870,8 @@
         "tests/test_smart_integration.py::test_smart_dry_run_reports_full_initial_index_without_changes": "tests/test_smart_integration.py/ test_smart_dry_run_reports_full_initial_index_without_changes().",
         "tests/test_smart_integration.py::test_smart_fills_never_indexed_tracked_file": "tests/test_smart_integration.py/ test_smart_fills_never_indexed_tracked_file().",
         "tests/test_smart_integration.py::test_smart_dry_run_clean_repo_exits_zero": "tests/test_smart_integration.py/ test_smart_dry_run_clean_repo_exits_zero().",
-        "tests/test_smart_integration.py::test_smart_dry_run_drift_exits_nonzero": "tests/test_smart_integration.py/ test_smart_dry_run_drift_exits_nonzero()."
+        "tests/test_smart_integration.py::test_smart_dry_run_drift_exits_nonzero": "tests/test_smart_integration.py/ test_smart_dry_run_drift_exits_nonzero().",
+        "tests/test_smart_integration.py::test_run_deletes_orphan_page_when_source_deleted": "tests/test_smart_integration.py/ test_run_deletes_orphan_page_when_source_deleted()."
       }
     },
     "tests/test_verify.py": {
@@ -923,7 +929,7 @@
       }
     },
     "tests/test_wiki.py": {
-      "hash": "sha256:0f862875ae2decff2c9fb233ce67cf33dc95d357bc8b291f79543a12b8c6486b",
+      "hash": "sha256:8735e914d3854f5ee426afa7e564b2c826420311d40c1a26cf15443db906152a",
       "wiki_page": "wiki/tests.md",
       "component_ids": [
         "tests/test_wiki.py::_make_node",
@@ -948,7 +954,10 @@
         "tests/test_wiki.py::test_index_renders_core_abstractions",
         "tests/test_wiki.py::test_page_basename_root_group",
         "tests/test_wiki.py::test_page_basename_nested_group",
-        "tests/test_wiki.py::test_page_relpath_matches_write_page"
+        "tests/test_wiki.py::test_page_relpath_matches_write_page",
+        "tests/test_wiki.py::test_delete_orphan_pages_removes_unreferenced",
+        "tests/test_wiki.py::test_delete_orphan_pages_noop_when_all_referenced",
+        "tests/test_wiki.py::test_delete_orphan_pages_missing_wiki_dir"
       ],
       "scip": {
         "tests/test_wiki.py::_make_node": "tests/test_wiki.py/ _make_node().",
@@ -973,7 +982,10 @@
         "tests/test_wiki.py::test_index_renders_core_abstractions": "tests/test_wiki.py/ test_index_renders_core_abstractions().",
         "tests/test_wiki.py::test_page_basename_root_group": "tests/test_wiki.py/ test_page_basename_root_group().",
         "tests/test_wiki.py::test_page_basename_nested_group": "tests/test_wiki.py/ test_page_basename_nested_group().",
-        "tests/test_wiki.py::test_page_relpath_matches_write_page": "tests/test_wiki.py/ test_page_relpath_matches_write_page()."
+        "tests/test_wiki.py::test_page_relpath_matches_write_page": "tests/test_wiki.py/ test_page_relpath_matches_write_page().",
+        "tests/test_wiki.py::test_delete_orphan_pages_removes_unreferenced": "tests/test_wiki.py/ test_delete_orphan_pages_removes_unreferenced().",
+        "tests/test_wiki.py::test_delete_orphan_pages_noop_when_all_referenced": "tests/test_wiki.py/ test_delete_orphan_pages_noop_when_all_referenced().",
+        "tests/test_wiki.py::test_delete_orphan_pages_missing_wiki_dir": "tests/test_wiki.py/ test_delete_orphan_pages_missing_wiki_dir()."
       }
     }
   }

@@ -17,7 +17,7 @@ from indexer.ast_parser import parse_file, load_cached_nodes, save_cached_nodes,
 from indexer.llm import describe_nodes, describe_files, deep_enrich_page, deep_enrich_index, synthesize_commit_message
 from indexer.grouper import density_group
 from indexer.graph import build_blast_radius_map, god_nodes, repo_map
-from indexer.wiki import build_page, build_index, write_page, write_index, PageContext, IndexEntry, TEMPLATES_DIR, page_relpath
+from indexer.wiki import build_page, build_index, write_page, write_index, PageContext, IndexEntry, TEMPLATES_DIR, page_relpath, delete_orphan_pages
 from indexer.hooks import install_hook, remove_hook
 
 # Shared navigation guidance, written to both CLAUDE.md and AGENTS.md. The
@@ -126,7 +126,25 @@ def run(staged: bool, force: bool, smart: bool, dry_run: bool, skip_deep: bool, 
     candidates = [f for f in candidates if _is_indexable(f, cfg)]
 
     if not candidates:
-        click.echo("  Nothing to index.")
+        # Nothing to re-index — but a deletion-only change still needs cleanup:
+        # prune manifest entries + orphan wiki pages for files no longer tracked.
+        # (Deletions don't appear in changed_files_since's ACM filter, so this is
+        # the only place a delete-only commit gets reconciled on a plain run.)
+        if _prune_deleted(root, cfg, manifest):
+            from indexer.repair import _index_entries_from_manifest
+            _finalise_index_and_skill(
+                root, cfg,
+                _index_entries_from_manifest(manifest),
+                {},
+                sum(len(e.component_ids) for e in manifest.files.values()),
+                len(manifest.files), skip_deep,
+            )
+            manifest.last_indexed_commit = current_commit(root) or manifest.last_indexed_commit
+            manifest.indexed_at = datetime.now(timezone.utc).isoformat()
+            save_manifest(root, manifest)
+            click.echo("  Cleaned up deleted file(s).")
+        else:
+            click.echo("  Nothing to index.")
         return
 
     mode = "staged" if staged else ("full re-index" if force else "incremental")
@@ -421,6 +439,29 @@ def _finalise_index_and_skill(
     click.echo(f"    ✓  .indexer/skills/codebase.md")
 
 
+def _prune_deleted(root: Path, cfg: Config, manifest) -> bool:
+    """Reconcile the manifest + wiki with deleted source files.
+
+    Drops manifest entries for files no longer tracked in git, then deletes any
+    wiki page left unreferenced. Returns True if anything was removed (so the
+    caller knows to rebuild INDEX/skill + persist). No-op (returns False) when
+    not a git repo or nothing was deleted.
+    """
+    if not is_git_repo(root):
+        return False
+    tracked = set(all_tracked_files(root))
+    stale_keys = [k for k in manifest.files if k not in tracked]
+    for k in stale_keys:
+        del manifest.files[k]
+    referenced_pages = {e.wiki_page for e in manifest.files.values()}
+    orphans = delete_orphan_pages(root, cfg.wiki_dir, referenced_pages)
+    for k in stale_keys:
+        click.echo(f"    ✓  pruned manifest entry: {k}")
+    for rel_page in orphans:
+        click.echo(f"    ✓  pruned orphan {rel_page}")
+    return bool(stale_keys or orphans)
+
+
 def _index_and_persist(
     root: Path,
     cfg: Config,
@@ -472,6 +513,14 @@ def _index_and_persist(
         stale_keys = [k for k in manifest.files if k not in tracked]
         for k in stale_keys:
             del manifest.files[k]
+
+    # Delete wiki pages no longer referenced by the (now-pruned) manifest — e.g.
+    # the last source file in a group was deleted, so its page would otherwise
+    # linger as an orphan. Keeps `run` (and the hook) self-cleaning.
+    referenced_pages = {e.wiki_page for e in manifest.files.values()}
+    orphans = delete_orphan_pages(root, cfg.wiki_dir, referenced_pages)
+    for rel_page in orphans:
+        click.echo(f"    ✓  pruned orphan {rel_page}")
 
     save_manifest(root, manifest)
 

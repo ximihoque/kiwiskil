@@ -252,6 +252,31 @@ def write_page(wiki_dir: Path, group_label: str, content: str) -> Path:
     return page_path
 
 
+def delete_orphan_pages(root: Path, wiki_dir: str, referenced_pages: set[str]) -> list[str]:
+    """Delete `wiki/*.md` files no longer referenced by the manifest.
+
+    An orphan is any actual page on disk (excluding INDEX.md) whose repo-relative
+    path is not in `referenced_pages` (the manifest's wiki_page values). This
+    happens when the last source file in a group is deleted — the group is never
+    re-rendered, so its page would otherwise linger. Shared by `run` (so the
+    pre-commit hook self-cleans) and `--smart` repair.
+
+    Returns the sorted list of repo-relative page paths deleted.
+    """
+    wiki_path = root / wiki_dir
+    if not wiki_path.exists():
+        return []
+    actual = {
+        f"{wiki_dir}/{p.name}"
+        for p in wiki_path.glob("*.md")
+        if p.name != "INDEX.md"
+    }
+    orphans = sorted(actual - referenced_pages)
+    for rel_page in orphans:
+        (root / rel_page).unlink()
+    return orphans
+
+
 def write_index(wiki_dir: Path, content: str) -> Path:
     wiki_dir.mkdir(parents=True, exist_ok=True)
     index_path = wiki_dir / "INDEX.md"

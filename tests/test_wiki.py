@@ -216,3 +216,37 @@ def test_page_relpath_matches_write_page(tmp_path):
         rel = page_relpath("wiki", group)
         written = write_page(tmp_path / "wiki", group, "# x")
         assert rel == f"wiki/{written.name}"
+
+
+# ── orphan page deletion (shared by run + repair) ─────────────────────────────
+
+def test_delete_orphan_pages_removes_unreferenced(tmp_path):
+    from indexer.wiki import delete_orphan_pages
+    wiki = tmp_path / "wiki"
+    wiki.mkdir()
+    (wiki / "INDEX.md").write_text("# i")          # never an orphan
+    (wiki / "kept.md").write_text("# kept")        # referenced
+    (wiki / "gone.md").write_text("# gone")        # orphan
+    referenced = {"wiki/kept.md"}
+    deleted = delete_orphan_pages(tmp_path, "wiki", referenced)
+    assert deleted == ["wiki/gone.md"]
+    assert not (wiki / "gone.md").exists()
+    assert (wiki / "kept.md").exists()
+    assert (wiki / "INDEX.md").exists()
+
+
+def test_delete_orphan_pages_noop_when_all_referenced(tmp_path):
+    from indexer.wiki import delete_orphan_pages
+    wiki = tmp_path / "wiki"
+    wiki.mkdir()
+    (wiki / "INDEX.md").write_text("# i")
+    (wiki / "a.md").write_text("# a")
+    deleted = delete_orphan_pages(tmp_path, "wiki", {"wiki/a.md"})
+    assert deleted == []
+    assert (wiki / "a.md").exists()
+
+
+def test_delete_orphan_pages_missing_wiki_dir(tmp_path):
+    from indexer.wiki import delete_orphan_pages
+    # No wiki dir at all -> no error, nothing deleted.
+    assert delete_orphan_pages(tmp_path, "wiki", set()) == []

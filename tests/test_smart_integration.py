@@ -323,3 +323,47 @@ def test_smart_dry_run_drift_exits_nonzero():
 
         result = runner.invoke(main, ["run", "--smart", "--dry-run", "--skip-deep"])
         assert result.exit_code != 0, result.output
+
+
+def test_run_deletes_orphan_page_when_source_deleted(monkeypatch):
+    """Deleting the last source file in a group must remove its wiki page on the
+    next plain `run` — not just prune the manifest entry (the bug)."""
+    _stub_llm(monkeypatch)
+    runner = CliRunner()
+    with runner.isolated_filesystem() as d:
+        root = Path(d)
+        _bootstrap_repo(root)
+        # merge_threshold=1 so each folder is its own group -> its own page.
+        (root / ".indexer.toml").write_text(
+            '[llm]\nprovider="anthropic/claude-sonnet-4-6"\napi_key_env=""\n'
+            '[indexer]\nwiki_dir="wiki"\nignore=[]\nmax_tokens_per_batch=8000\nmerge_threshold=1\n'
+            '[hooks]\npre_commit=true\nsynthesize_commit_message=false\ndeep=false\n'
+        )
+        (root / "alpha").mkdir()
+        (root / "beta").mkdir()
+        (root / "alpha" / "a.py").write_text("def a(): pass\n")
+        (root / "beta" / "b.py").write_text("def b(): pass\n")
+        subprocess.run(["git", "add", "."], cwd=root, check=True)
+        subprocess.run(["git", "commit", "-q", "-m", "init"], cwd=root, check=True)
+
+        # Initial full index.
+        r1 = runner.invoke(main, ["run", "--force", "--skip-deep"])
+        assert r1.exit_code == 0, r1.output
+        pages = {p.name for p in (root / "wiki").glob("*.md")}
+        assert "beta.md" in pages, pages
+
+        # Delete beta's only file and commit the deletion.
+        (root / "beta" / "b.py").unlink()
+        subprocess.run(["git", "add", "-A"], cwd=root, check=True)
+        subprocess.run(["git", "commit", "-q", "-m", "rm beta"], cwd=root, check=True)
+
+        # Plain incremental run should now clean up the orphan page.
+        r2 = runner.invoke(main, ["run", "--skip-deep"])
+        assert r2.exit_code == 0, r2.output
+
+        pages_after = {p.name for p in (root / "wiki").glob("*.md")}
+        assert "beta.md" not in pages_after, f"orphan page lingered: {pages_after}"
+        assert "alpha.md" in pages_after
+        # Manifest no longer references the deleted file.
+        m = load_manifest(root)
+        assert "beta/b.py" not in m.files
