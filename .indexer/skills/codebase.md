@@ -20,19 +20,19 @@ The wiki captures structure, relationships, and constraints in a fraction of the
 
 ## Stats
 
-- **350 symbols** across **37 files** — indexed 2026-06-22 @ `8a10bfcb`
+- **353 symbols** across **37 files** — indexed 2026-06-22 @ `2f65edbc`
 - Wiki: `wiki/` — 3 page(s)
 - Manifest: `.indexer/manifest.json` — maps every file to its wiki page and component IDs
 
 ## System Overview
 
-kiwiskil is a codebase indexer that transforms source repos into a checked-in, LLM-navigable knowledge artifact (wiki pages + manifest + skill file) with no running server. The pipeline is orchestrated by `cli.py` (`run`/`run --smart`/`run --staged`/`status`/`init`/`hook`): `langs.py` filters indexable files; `ast_parser.py`, `js_parser.py`, and `ts_extract.py` parse symbols and call graphs per language; `grouper.py` clusters files into wiki pages by density threshold; `llm.py` calls Anthropic SDK or falls back to the `claude` CLI subprocess to generate LLM descriptions; `wiki.py` renders Jinja2-templated markdown with OKF YAML frontmatter; and `manifest.py` persists file→component-ID hash mappings. `graph.py` computes PageRank and blast-radius over the call graph; `verify.py` detects drift between filesystem, manifest, and wiki; `repair.py` computes and executes a minimal `RepairPlan`; and `hooks.py` manages the pre-commit hook for incremental re-indexing.
+kiwiskil is a codebase indexer that transforms source repos into a checked-in, LLM-navigable knowledge artifact (wiki pages + manifest + skill file) with no running server. The pipeline entry point is `cli.py` (`run`/`run --smart`/`run --staged`/`status`/`init`/`hook`): language filtering via `langs.py`, multi-language symbol/call-graph extraction via `ast_parser.py`, `js_parser.py`, and `ts_extract.py`, file clustering via `grouper.py` (density threshold), and markdown wiki generation via `wiki.py` (Jinja2 + OKF YAML frontmatter). `llm.py` drives all LLM calls (Anthropic SDK or `claude` CLI subprocess fallback) for node descriptions and page enrichment; `graph.py` computes PageRank and blast-radius over the call graph; `manifest.py` persists file→component-ID hash mappings; and `verify.py`/`repair.py` detect and resolve drift between filesystem, manifest, and wiki. `hooks.py` wires the pre-commit hook for incremental re-indexing.
 ## Key Request Flows
 - Full index: cli.run → git.all_tracked_files → langs.is_indexable → cli._index_and_persist → ast_parser.parse_file / js_parser.parse_js_file / ts_extract.extract_generic → grouper.density_group → llm.describe_nodes / deep_enrich_page → graph.build_blast_radius_map → wiki.build_page / write_page → cli._finalise_index_and_skill [graph.repo_map + llm.deep_enrich_index → wiki.build_index] → manifest.save_manifest
 - Incremental staged (pre-commit hook): hooks.py triggers cli.run --staged → git.staged_files → langs.is_indexable → manifest.Manifest.stale_files (hash check) → cli._index_and_persist (changed files only) → same _index_files/_finalise pipeline → manifest.save_manifest → llm.synthesize_commit_message
-- Smart repair: cli.run --smart → cli._run_smart → verify.scan [manifest vs filesystem vs wiki drift detection → VerifyReport] → repair.plan [VerifyReport → RepairPlan: dirty re-index, orphan page delete, dangling entry prune] → repair.execute [cli._index_files + cli._finalise_index_and_skill + manifest.save_manifest + cli._ensure_nav_guidance]
-- LLM dispatch: llm._complete → llm._resolve_api_key (env var priority) → Anthropic SDK path (llm._anthropic_completion) OR claude CLI subprocess fallback (llm._claude_cli_completion) → llm._clean_json strips fences/preamble → structured dict returned to describe_nodes / deep_enrich_page / deep_enrich_index
-- Blast radius tracing: graph.blast_radius(symbol) → BFS over reverse call edges via graph._index_by_id → transitive set of impacted component IDs → precomputed for all nodes by graph.build_blast_radius_map during _index_files → rendered per symbol in wiki.py._symbol_relationships as 'Editing this affects' lists
+- Smart repair: cli.run --smart → cli._run_smart → verify.scan [manifest vs filesystem vs wiki drift → VerifyReport] → repair.plan [VerifyReport → RepairPlan] → repair.execute [cli._index_files + cli._finalise_index_and_skill + manifest.save_manifest + cli._ensure_nav_guidance]
+- LLM dispatch: llm._complete → llm._resolve_api_key → Anthropic SDK (llm._anthropic_completion) OR claude CLI subprocess fallback (llm._claude_cli_completion) → llm._clean_json strips fences/preamble → structured dict returned to describe_nodes / deep_enrich_page / deep_enrich_index
+- Blast radius tracing: graph.blast_radius(symbol) → BFS over reverse call edges via graph._index_by_id → transitive impacted component IDs → precomputed by graph.build_blast_radius_map during _index_files → rendered per symbol in wiki.py._symbol_relationships as 'Editing this affects' lists
 
 ## Wiki Pages
 
@@ -43,19 +43,19 @@ kiwiskil is a codebase indexer that transforms source repos into a checked-in, L
 | [tests_fixtures](../wiki/tests_fixtures.md) | tests/fixtures/sample_go/server.go, tests/fixtures/sample_java/Widget.java, tests/fixtures/sample_py/auth.py, tests/fixtures/sample_ruby/widget.rb, tests/fixtures/sample_rust/widget.rs |  |
 ## Critical Constraints (read before editing)
 **indexer**
-- page_basename() is the single source of truth for wiki filename derivation — manifest's wiki_page field MUST use page_relpath() (which calls page_basename()), never the raw group label; divergence causes --smart to see phantom missing-page + orphan-page for the same group
-- _index_files() writes wiki pages as a side effect but does NOT touch INDEX.md, the skill file, manifest, .gitignore, hooks, or CLAUDE.md — callers must call _finalise_index_and_skill() and save_manifest() separately or those artifacts will be stale
-- PageContext.timestamp and blast_radius_map are computed in cli.py (_index_files), never inside wiki.py or templates — Date.now()-equivalent calls are banned inside rendering to preserve determinism and resume safety
-- delete_orphan_pages() excludes INDEX.md by name check (p.name != 'INDEX.md') — all other wiki/*.md files not in the manifest's referenced_pages set are deleted unconditionally, including any hand-authored pages
-- _ensure_nav_guidance() uses the string 'Codebase Navigation' as the idempotency marker, not a comment or sentinel line — editing that heading in CLAUDE.md/AGENTS.md causes the block to be appended again on next init or run
-- --smart and --force/--staged are mutually exclusive at the CLI level (UsageError); --dry-run and --no-hook-check are only valid with --smart; these constraints are enforced before any I/O
+- ASTNode.called_by is NEVER populated by ast_parser — it is always `[]` at parse time and only filled by the cross-reference pass in `_index_files` (cli.py Phase 2); cached nodes therefore also have empty called_by and must go through cross-reference again on every run
+- Orphan wiki page deletion and manifest pruning are ONLY safe when `full_repo=True`; on --staged or incremental runs these destructive operations are explicitly skipped because the manifest only reflects the touched subset, and deleting based on a partial view would wipe all untouched pages' entries
+- `_expand_candidates_to_groups()` computes grouping over the ENTIRE tracked repo (not just candidates) so that partial runs produce byte-identical page output to full runs for touched groups — if you call `density_group` on candidates only, you get a different bucketing and split pages
+- `staged_files()` and `changed_files_since()` both use `--diff-filter=ACM` — deletions (D) are excluded; deleted-file cleanup only happens via `_prune_deleted()` called explicitly in the no-candidates branch of `run`, meaning a delete-only commit is NOT reconciled by the pre-commit hook, only by a subsequent plain `run`
+- `load_cached_nodes()` returns `None` (not raises) on cache miss or JSON corruption; `parse_file()` returns `[]` (not raises) on syntax error or unknown suffix — callers must handle empty returns gracefully
+- Config TOML has three top-level sections (`llm`, `indexer`, `hooks`); `load_config` silently returns `Config()` defaults if `.indexer.toml` is absent — there is no validation or error on a malformed file, missing keys just fall back to defaults
 **tests**
-- Exit code is the CI gate signal: `--dry-run` exits nonzero on ANY drift (stale hash, missing wiki page, no manifest with indexable files) and exits zero only on fully clean state — callers must not treat nonzero as error in repair flows, only in CI checks.
-- `--smart` is mutually exclusive with both `--force` and `--staged`; passing either combination fails before touching the filesystem.
-- A repo with no indexable tracked files (e.g. only README.md) causes `--smart` to exit nonzero with a 'nothing to index' message — it does NOT silently succeed.
-- `_stub_llm` must patch all four symbols in `indexer.cli` (not `indexer.llm` or module-local); tests that call LLM code paths without this stub will make real API calls or crash on missing keys.
-- `page_basename('.')` returns `'root'` and nested paths use `_` as separator (`a/b/c` → `a_b_c`); the manifest's `wiki_page` field must be computed via `page_relpath` not by manual string construction — the two must stay in sync or orphan detection breaks.
-- Blast-radius lists longer than ~10 entries are truncated with a `… (+k more)` marker in page output; tests assert on `'more)'` substring, so this truncation threshold is a tested invariant, not an implementation detail.
+- imports on ASTNode are file-level; every node from a given file carries the full import list, not just the imports visible in that node's scope
+- callees_of resolves bare callee names (the strings in node.calls) against known node IDs by suffix match; unresolvable names (builtins, third-party) are silently dropped—callers must not assume completeness
+- blast_radius uses called_by (pre-resolved component IDs) for traversal, NOT calls; the cross-ref pass in cli.py::_index_files must populate called_by before graph functions are meaningful
+- blast_radius returns empty set for an unknown symbol ID rather than raising—callers cannot distinguish 'no upstream callers' from 'symbol not in graph'
+- god_nodes degree = len(called_by) + len(calls) on the raw node fields; it does NOT resolve bare names, so external calls that appear in calls inflate degree artificially
+- repo_map token budget is approximate (not exact tokenization); the test uses ~4 chars/token with a 6× slack factor, meaning output can exceed max_tokens in characters if symbol names are short
 
 ## Workflow — How to Answer Questions About This Codebase
 

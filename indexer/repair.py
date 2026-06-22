@@ -116,8 +116,14 @@ def execute(plan_obj: RepairPlan, root: Path, cfg: Config, manifest: Manifest, s
 
     # ── Step 1: re-index dirty source files ───────────────────────────────────
     if plan_obj.files_to_reindex:
-        click.echo(f"\n  Repairing  ({len(plan_obj.files_to_reindex)} file(s))")
-        result = _index_files(root, cfg, plan_obj.files_to_reindex, skip_deep)
+        # Expand to every file sharing a touched page, so each re-rendered page is
+        # built from its complete node set (not just the changed files). Without
+        # this, repairing one file rewrites its whole page from a partial view,
+        # dropping every sibling module's symbols.
+        from indexer.cli import _expand_candidates_to_groups
+        to_reindex = _expand_candidates_to_groups(root, cfg, plan_obj.files_to_reindex)
+        click.echo(f"\n  Repairing  ({len(to_reindex)} file(s))")
+        result = _index_files(root, cfg, to_reindex, skip_deep)
         _descriptions, _file_descriptions, all_nodes, page_enrichments, groups, _entries = result
 
     # ── Step 2: delete orphan wiki pages ──────────────────────────────────────

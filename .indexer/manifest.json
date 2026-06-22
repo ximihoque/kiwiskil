@@ -1,6 +1,6 @@
 {
-  "last_indexed_commit": "8a10bfcbb107480b1347b31d82199d22383ca1b0",
-  "indexed_at": "2026-06-22T09:08:43.648962+00:00",
+  "last_indexed_commit": "2f65edbca068bce4230f8080bee9da28f9bebcca",
+  "indexed_at": "2026-06-22T13:12:13.895347+00:00",
   "files": {
     "indexer/__init__.py": {
       "hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -35,7 +35,7 @@
       }
     },
     "indexer/cli.py": {
-      "hash": "sha256:7a9f7f6d8d7dc6865a34d86f051aebc1061262c26a3bf3d250d45e18aceac4a1",
+      "hash": "sha256:becadf288c66b4d73680f90aed0d5f1b9f5ec5467cdcce157e6183f57549b1c7",
       "wiki_page": "wiki/indexer.md",
       "component_ids": [
         "indexer/cli.py::_ensure_nav_guidance",
@@ -51,6 +51,7 @@
         "indexer/cli.py::_index_files",
         "indexer/cli.py::_finalise_index_and_skill",
         "indexer/cli.py::_prune_deleted",
+        "indexer/cli.py::_expand_candidates_to_groups",
         "indexer/cli.py::_index_and_persist",
         "indexer/cli.py::_run_smart"
       ],
@@ -68,6 +69,7 @@
         "indexer/cli.py::_index_files": "indexer/cli.py/ _index_files().",
         "indexer/cli.py::_finalise_index_and_skill": "indexer/cli.py/ _finalise_index_and_skill().",
         "indexer/cli.py::_prune_deleted": "indexer/cli.py/ _prune_deleted().",
+        "indexer/cli.py::_expand_candidates_to_groups": "indexer/cli.py/ _expand_candidates_to_groups().",
         "indexer/cli.py::_index_and_persist": "indexer/cli.py/ _index_and_persist().",
         "indexer/cli.py::_run_smart": "indexer/cli.py/ _run_smart()."
       }
@@ -265,7 +267,7 @@
       }
     },
     "indexer/repair.py": {
-      "hash": "sha256:d5457a907d8fdd83ce0618d0d552870cc3fe1c8dd3a1217a62e86a0243bc6a78",
+      "hash": "sha256:dcd791c3858d8e08130601b7982661fdee1928528845a494849be4e9d608cad3",
       "wiki_page": "wiki/indexer.md",
       "component_ids": [
         "indexer/repair.py::RepairPlan",
@@ -839,7 +841,7 @@
       }
     },
     "tests/test_smart_integration.py": {
-      "hash": "sha256:d2cbd592098589722c8137689f7fab162779f1837e49f3f2aa32ba24d8536f5a",
+      "hash": "sha256:1f0ad03611da00ae9681b76126da69cc026fb1cc46d05be6946317ccfbd89321",
       "wiki_page": "wiki/tests.md",
       "component_ids": [
         "tests/test_smart_integration.py::_bootstrap_repo",
@@ -855,7 +857,9 @@
         "tests/test_smart_integration.py::test_smart_fills_never_indexed_tracked_file",
         "tests/test_smart_integration.py::test_smart_dry_run_clean_repo_exits_zero",
         "tests/test_smart_integration.py::test_smart_dry_run_drift_exits_nonzero",
-        "tests/test_smart_integration.py::test_run_deletes_orphan_page_when_source_deleted"
+        "tests/test_smart_integration.py::test_run_deletes_orphan_page_when_source_deleted",
+        "tests/test_smart_integration.py::test_staged_subset_does_not_regroup_whole_wiki",
+        "tests/test_smart_integration.py::test_staged_run_does_not_delete_pages_for_unstaged_files"
       ],
       "scip": {
         "tests/test_smart_integration.py::_bootstrap_repo": "tests/test_smart_integration.py/ _bootstrap_repo().",
@@ -871,7 +875,9 @@
         "tests/test_smart_integration.py::test_smart_fills_never_indexed_tracked_file": "tests/test_smart_integration.py/ test_smart_fills_never_indexed_tracked_file().",
         "tests/test_smart_integration.py::test_smart_dry_run_clean_repo_exits_zero": "tests/test_smart_integration.py/ test_smart_dry_run_clean_repo_exits_zero().",
         "tests/test_smart_integration.py::test_smart_dry_run_drift_exits_nonzero": "tests/test_smart_integration.py/ test_smart_dry_run_drift_exits_nonzero().",
-        "tests/test_smart_integration.py::test_run_deletes_orphan_page_when_source_deleted": "tests/test_smart_integration.py/ test_run_deletes_orphan_page_when_source_deleted()."
+        "tests/test_smart_integration.py::test_run_deletes_orphan_page_when_source_deleted": "tests/test_smart_integration.py/ test_run_deletes_orphan_page_when_source_deleted().",
+        "tests/test_smart_integration.py::test_staged_subset_does_not_regroup_whole_wiki": "tests/test_smart_integration.py/ test_staged_subset_does_not_regroup_whole_wiki().",
+        "tests/test_smart_integration.py::test_staged_run_does_not_delete_pages_for_unstaged_files": "tests/test_smart_integration.py/ test_staged_run_does_not_delete_pages_for_unstaged_files()."
       }
     },
     "tests/test_verify.py": {

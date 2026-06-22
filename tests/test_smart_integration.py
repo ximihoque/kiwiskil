@@ -367,3 +367,91 @@ def test_run_deletes_orphan_page_when_source_deleted(monkeypatch):
         # Manifest no longer references the deleted file.
         m = load_manifest(root)
         assert "beta/b.py" not in m.files
+
+
+def test_staged_subset_does_not_regroup_whole_wiki(monkeypatch):
+    """THE regression test for the destructive bug: a --staged run over a 2-file
+    subset must NOT re-bucket / delete the rest of the wiki. Page layout must be
+    identical to a full index, and untouched pages must survive unchanged."""
+    _stub_llm(monkeypatch)
+    runner = CliRunner()
+    with runner.isolated_filesystem() as d:
+        root = Path(d)
+        _bootstrap_repo(root)
+        # merge_threshold=1 -> each folder is its own page (max sensitivity to regroup).
+        (root / ".indexer.toml").write_text(
+            '[llm]\nprovider="anthropic/claude-sonnet-4-6"\napi_key_env=""\n'
+            '[indexer]\nwiki_dir="wiki"\nignore=[]\nmax_tokens_per_batch=8000\nmerge_threshold=1\n'
+            '[hooks]\npre_commit=false\nsynthesize_commit_message=false\ndeep=false\n'
+        )
+        for pkg in ("alpha", "beta", "gamma"):
+            (root / pkg).mkdir()
+            (root / pkg / "m.py").write_text(f"def {pkg}_fn(): pass\n")
+        subprocess.run(["git", "add", "."], cwd=root, check=True)
+        subprocess.run(["git", "commit", "-q", "-m", "init"], cwd=root, check=True)
+
+        # Full index -> establishes the correct page layout.
+        assert runner.invoke(main, ["run", "--force", "--skip-deep"]).exit_code == 0
+        full_pages = {p.name for p in (root / "wiki").glob("*.md")}
+        assert full_pages == {"INDEX.md", "alpha.md", "beta.md", "gamma.md"}, full_pages
+        beta_before = (root / "wiki" / "beta.md").read_text()
+        gamma_before = (root / "wiki" / "gamma.md").read_text()
+
+        # Now change ONLY alpha and stage just that one file, then run --staged
+        # (what the pre-commit hook does).
+        (root / "alpha" / "m.py").write_text("def alpha_fn(): return 1\n")
+        subprocess.run(["git", "add", "alpha/m.py"], cwd=root, check=True)
+        assert runner.invoke(main, ["run", "--staged", "--skip-deep"]).exit_code == 0
+
+        # The bug: beta.md / gamma.md got deleted or regrouped. The fix: they survive.
+        after_pages = {p.name for p in (root / "wiki").glob("*.md")}
+        assert after_pages == full_pages, f"wiki was regrouped from a subset! {after_pages}"
+        # Untouched pages must be byte-identical (not rewritten from a 1-file view).
+        assert (root / "wiki" / "beta.md").read_text() == beta_before, "beta.md was clobbered"
+        assert (root / "wiki" / "gamma.md").read_text() == gamma_before, "gamma.md was clobbered"
+
+
+def test_staged_run_does_not_delete_pages_for_unstaged_files(monkeypatch):
+    """The actual destructive bug: on a --staged run with a manifest that only
+    covers the staged file (e.g. a fresh/stale worktree), the orphan-prune saw
+    every OTHER page as unreferenced and DELETED it — wiping the wiki. A staged
+    run must never delete pages for files that simply weren't staged."""
+    _stub_llm(monkeypatch)
+    runner = CliRunner()
+    with runner.isolated_filesystem() as d:
+        root = Path(d)
+        _bootstrap_repo(root)
+        (root / ".indexer.toml").write_text(
+            '[llm]\nprovider="anthropic/claude-sonnet-4-6"\napi_key_env=""\n'
+            '[indexer]\nwiki_dir="wiki"\nignore=[]\nmax_tokens_per_batch=8000\nmerge_threshold=1\n'
+            '[hooks]\npre_commit=false\nsynthesize_commit_message=false\ndeep=false\n'
+        )
+        for pkg in ("alpha", "beta", "gamma"):
+            (root / pkg).mkdir()
+            (root / pkg / "m.py").write_text(f"def {pkg}_fn(): pass\n")
+        subprocess.run(["git", "add", "."], cwd=root, check=True)
+        subprocess.run(["git", "commit", "-q", "-m", "init"], cwd=root, check=True)
+
+        # Wiki pages for ALL three exist on disk (e.g. cloned/committed)...
+        assert runner.invoke(main, ["run", "--force", "--skip-deep"]).exit_code == 0
+        assert (root / "wiki" / "beta.md").exists()
+        assert (root / "wiki" / "gamma.md").exists()
+
+        # ...but simulate a STALE worktree: manifest knows only about alpha.
+        from indexer.manifest import Manifest, FileEntry, save_manifest, compute_hash
+        save_manifest(root, Manifest(
+            last_indexed_commit="stale", indexed_at="old",
+            files={"alpha/m.py": FileEntry(
+                hash=compute_hash(root / "alpha" / "m.py"),
+                wiki_page="wiki/alpha.md", component_ids=[])},
+        ))
+
+        # Stage + run --staged on just alpha (what the hook does).
+        (root / "alpha" / "m.py").write_text("def alpha_fn(): return 1\n")
+        subprocess.run(["git", "add", "alpha/m.py"], cwd=root, check=True)
+        assert runner.invoke(main, ["run", "--staged", "--skip-deep"]).exit_code == 0
+
+        # beta.md / gamma.md belong to tracked files that simply weren't staged —
+        # they MUST survive. The bug deleted them.
+        assert (root / "wiki" / "beta.md").exists(), "beta.md was wrongly deleted on a staged run"
+        assert (root / "wiki" / "gamma.md").exists(), "gamma.md was wrongly deleted on a staged run"

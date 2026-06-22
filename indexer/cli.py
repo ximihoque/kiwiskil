@@ -148,7 +148,10 @@ def run(staged: bool, force: bool, smart: bool, dry_run: bool, skip_deep: bool, 
         return
 
     mode = "staged" if staged else ("full re-index" if force else "incremental")
-    _index_and_persist(root, cfg, manifest, candidates, skip_deep, mode=mode, staged=staged)
+    # full_repo gates destructive prune/orphan-deletion — only when candidates IS
+    # the whole tracked set: a --force run, or the first-ever index (no manifest).
+    full_repo = not staged and (force or manifest.last_indexed_commit is None)
+    _index_and_persist(root, cfg, manifest, candidates, skip_deep, mode=mode, staged=staged, full_repo=full_repo)
 
 
 @main.command()
@@ -305,8 +308,14 @@ def _index_files(
     click.echo(f"  {filled_files}/{len(file_nodes)} described\n")
 
     # ── Phase 5: Group → wiki pages ───────────────────────────────────────────
+    # Grouping is computed over the WHOLE tracked repo (see _expand_candidates),
+    # so a partial run produces the SAME page layout a full run would — never
+    # re-buckets the wiki from a subset. `candidates` was already widened to every
+    # file in each touched group, so each rendered page sees its full node set.
     click.echo("  Writing wiki")
-    groups = density_group(candidates, merge_threshold=cfg.merge_threshold)
+    grouping_files = [f for f in all_tracked_files(root) if _is_indexable(f, cfg)] if is_git_repo(root) else candidates
+    grouping_files = sorted(set(grouping_files) | set(candidates))
+    groups = density_group(grouping_files, merge_threshold=cfg.merge_threshold)
     group_nodes: dict[str, list] = {}
     for node in all_nodes:
         group = groups.get(node.file, node.file)
@@ -462,6 +471,26 @@ def _prune_deleted(root: Path, cfg: Config, manifest) -> bool:
     return bool(stale_keys or orphans)
 
 
+def _expand_candidates_to_groups(root: Path, cfg: Config, candidates: list[str]) -> list[str]:
+    """Widen `candidates` to every tracked file sharing a wiki page with one of
+    them, using the WHOLE-repo grouping.
+
+    A wiki page is generated from all files in its group, so to re-render a page
+    correctly we must re-index every file in that page's group — not just the
+    changed one (otherwise the page is rewritten from a partial view, dropping
+    the unchanged files' symbols). Returns `candidates` unchanged when not a git
+    repo or when nothing maps in.
+    """
+    if not is_git_repo(root):
+        return candidates
+    tracked = [f for f in all_tracked_files(root) if _is_indexable(f, cfg)]
+    groups = density_group(sorted(set(tracked) | set(candidates)), merge_threshold=cfg.merge_threshold)
+    touched = {groups.get(f, f) for f in candidates}
+    expanded = {f for f in tracked if groups.get(f, f) in touched}
+    expanded.update(candidates)  # keep candidates even if untracked/new
+    return sorted(expanded)
+
+
 def _index_and_persist(
     root: Path,
     cfg: Config,
@@ -470,14 +499,30 @@ def _index_and_persist(
     skip_deep: bool,
     mode: str = "full re-index",
     staged: bool = False,
+    full_repo: bool = False,
 ) -> None:
     """
     Run the full index pipeline on ``candidates`` and persist all generated
     artifacts: wiki pages, INDEX, skill, and manifest.
 
+    ``full_repo`` MUST be True only when ``candidates`` is the entire tracked
+    set (a --force run or a fresh fill). It gates the DESTRUCTIVE cleanup —
+    pruning manifest entries and deleting "orphan" wiki pages — because on a
+    partial run (``--staged`` / incremental) every page outside the staged
+    subset would otherwise look orphaned and get deleted, wiping the wiki. On a
+    partial run we only write/update the touched pages and never delete.
+
     Shared by ``run`` (full/incremental/forced) and ``--smart``'s
     no-manifest / fresh-repo fill path so both produce identical output.
     """
+    # Widen the candidate set to every file sharing a touched page, so each
+    # re-rendered page is built from its complete node set (not just the changed
+    # files). Combined with whole-repo grouping in _index_files, this makes a
+    # partial run produce byte-identical pages to a full run for touched groups,
+    # and leaves untouched pages alone. No-op on a full run.
+    if not full_repo:
+        candidates = _expand_candidates_to_groups(root, cfg, candidates)
+
     click.echo(f"\n  kiwiskil  —  {mode}  —  {len(candidates)} file(s)\n")
 
     result = _index_files(root, cfg, candidates, skip_deep)
@@ -508,19 +553,21 @@ def _index_and_persist(
     manifest.last_indexed_commit = commit
     manifest.indexed_at = now
 
-    if is_git_repo(root):
+    # DESTRUCTIVE cleanup — manifest prune + orphan-page deletion — is SAFE only
+    # when this run covered the whole repo (the manifest is authoritative). On a
+    # partial run (--staged / incremental) the manifest only reflects the staged
+    # subset, so pruning here would delete every unstaged file's page — the wiki
+    # wipe. Partial runs therefore write/update touched pages only, delete nothing.
+    if full_repo and is_git_repo(root):
         tracked = set(all_tracked_files(root))
         stale_keys = [k for k in manifest.files if k not in tracked]
         for k in stale_keys:
             del manifest.files[k]
 
-    # Delete wiki pages no longer referenced by the (now-pruned) manifest — e.g.
-    # the last source file in a group was deleted, so its page would otherwise
-    # linger as an orphan. Keeps `run` (and the hook) self-cleaning.
-    referenced_pages = {e.wiki_page for e in manifest.files.values()}
-    orphans = delete_orphan_pages(root, cfg.wiki_dir, referenced_pages)
-    for rel_page in orphans:
-        click.echo(f"    ✓  pruned orphan {rel_page}")
+        referenced_pages = {e.wiki_page for e in manifest.files.values()}
+        orphans = delete_orphan_pages(root, cfg.wiki_dir, referenced_pages)
+        for rel_page in orphans:
+            click.echo(f"    ✓  pruned orphan {rel_page}")
 
     save_manifest(root, manifest)
 
@@ -576,8 +623,10 @@ def _run_smart(root: Path, cfg: Config, manifest, dry_run: bool, skip_deep: bool
             raise click.exceptions.Exit(1)
 
         _ensure_cache_gitignore(root)
+        # Fresh fill indexes the entire tracked set -> full_repo (prune is safe).
         _index_and_persist(
             root, cfg, manifest, candidates, skip_deep, mode="full initial index",
+            full_repo=True,
         )
         return
 
