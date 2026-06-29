@@ -20,19 +20,17 @@ The wiki captures structure, relationships, and constraints in a fraction of the
 
 ## Stats
 
-- **353 symbols** across **37 files** — indexed 2026-06-22 @ `2f65edbc`
+- **354 symbols** across **37 files** — indexed 2026-06-29 @ `354cb313`
 - Wiki: `wiki/` — 3 page(s)
 - Manifest: `.indexer/manifest.json` — maps every file to its wiki page and component IDs
 
 ## System Overview
 
-kiwiskil is a codebase indexer that transforms source repos into a checked-in, LLM-navigable knowledge artifact (wiki pages + manifest + skill file) with no running server. The pipeline entry point is `cli.py` (`run`/`run --smart`/`run --staged`/`status`/`init`/`hook`): language filtering via `langs.py`, multi-language symbol/call-graph extraction via `ast_parser.py`, `js_parser.py`, and `ts_extract.py`, file clustering via `grouper.py` (density threshold), and markdown wiki generation via `wiki.py` (Jinja2 + OKF YAML frontmatter). `llm.py` drives all LLM calls (Anthropic SDK or `claude` CLI subprocess fallback) for node descriptions and page enrichment; `graph.py` computes PageRank and blast-radius over the call graph; `manifest.py` persists file→component-ID hash mappings; and `verify.py`/`repair.py` detect and resolve drift between filesystem, manifest, and wiki. `hooks.py` wires the pre-commit hook for incremental re-indexing.
+The indexer is a polyglot codebase analysis engine that translates source code into a structured SCIP graph for downstream LLM consumption. It coordinates multi-language parsing via `ast_parser.py` and `ts_extract.py`, which feed a central `graph.py` structure managed by `grouper.py` and `manifest.py`. The `llm.py` and `repair.py` modules integrate AI-driven analysis to validate and fix index inconsistencies, orchestrated by a CLI interface that leverages `config.py` for environment-specific execution.
 ## Key Request Flows
-- Full index: cli.run → git.all_tracked_files → langs.is_indexable → cli._index_and_persist → ast_parser.parse_file / js_parser.parse_js_file / ts_extract.extract_generic → grouper.density_group → llm.describe_nodes / deep_enrich_page → graph.build_blast_radius_map → wiki.build_page / write_page → cli._finalise_index_and_skill [graph.repo_map + llm.deep_enrich_index → wiki.build_index] → manifest.save_manifest
-- Incremental staged (pre-commit hook): hooks.py triggers cli.run --staged → git.staged_files → langs.is_indexable → manifest.Manifest.stale_files (hash check) → cli._index_and_persist (changed files only) → same _index_files/_finalise pipeline → manifest.save_manifest → llm.synthesize_commit_message
-- Smart repair: cli.run --smart → cli._run_smart → verify.scan [manifest vs filesystem vs wiki drift → VerifyReport] → repair.plan [VerifyReport → RepairPlan] → repair.execute [cli._index_files + cli._finalise_index_and_skill + manifest.save_manifest + cli._ensure_nav_guidance]
-- LLM dispatch: llm._complete → llm._resolve_api_key → Anthropic SDK (llm._anthropic_completion) OR claude CLI subprocess fallback (llm._claude_cli_completion) → llm._clean_json strips fences/preamble → structured dict returned to describe_nodes / deep_enrich_page / deep_enrich_index
-- Blast radius tracing: graph.blast_radius(symbol) → BFS over reverse call edges via graph._index_by_id → transitive impacted component IDs → precomputed by graph.build_blast_radius_map during _index_files → rendered per symbol in wiki.py._symbol_relationships as 'Editing this affects' lists
+- Source code discovery → git.py/manifest.py detection → ast_parser.py/ts_extract.py parsing → scip.py graph generation
+- SCIP graph initialization → grouper.py entity clustering → llm.py analysis hook → repair.py consistency patching
+- CLI configuration load → indexer core processing → verify.py integrity check → wiki.py documentation generation
 
 ## Wiki Pages
 
@@ -43,19 +41,17 @@ kiwiskil is a codebase indexer that transforms source repos into a checked-in, L
 | [tests_fixtures](../wiki/tests_fixtures.md) | tests/fixtures/sample_go/server.go, tests/fixtures/sample_java/Widget.java, tests/fixtures/sample_py/auth.py, tests/fixtures/sample_ruby/widget.rb, tests/fixtures/sample_rust/widget.rs |  |
 ## Critical Constraints (read before editing)
 **indexer**
-- ASTNode.called_by is NEVER populated by ast_parser — it is always `[]` at parse time and only filled by the cross-reference pass in `_index_files` (cli.py Phase 2); cached nodes therefore also have empty called_by and must go through cross-reference again on every run
-- Orphan wiki page deletion and manifest pruning are ONLY safe when `full_repo=True`; on --staged or incremental runs these destructive operations are explicitly skipped because the manifest only reflects the touched subset, and deleting based on a partial view would wipe all untouched pages' entries
-- `_expand_candidates_to_groups()` computes grouping over the ENTIRE tracked repo (not just candidates) so that partial runs produce byte-identical page output to full runs for touched groups — if you call `density_group` on candidates only, you get a different bucketing and split pages
-- `staged_files()` and `changed_files_since()` both use `--diff-filter=ACM` — deletions (D) are excluded; deleted-file cleanup only happens via `_prune_deleted()` called explicitly in the no-candidates branch of `run`, meaning a delete-only commit is NOT reconciled by the pre-commit hook, only by a subsequent plain `run`
-- `load_cached_nodes()` returns `None` (not raises) on cache miss or JSON corruption; `parse_file()` returns `[]` (not raises) on syntax error or unknown suffix — callers must handle empty returns gracefully
-- Config TOML has three top-level sections (`llm`, `indexer`, `hooks`); `load_config` silently returns `Config()` defaults if `.indexer.toml` is absent — there is no validation or error on a malformed file, missing keys just fall back to defaults
+- The `parse_file` function returns an empty list upon encountering any syntax error, rather than raising an exception.
+- Cached AST nodes are stored as JSON files; manual modification of these files may result in deserialization errors or corrupted index states.
+- The `_ensure_nav_guidance` method is idempotent and should be called whenever initializing a repo to ensure CLAUDE.md integrity.
+- File tracking is strictly dependent on the existence of a `.git` repository; operations requiring `is_git_repo` will fail in detached environments.
+- The system performs grouping based on logic density; file membership in a group is determined by `density_group` and cannot be manually overridden.
 **tests**
-- imports on ASTNode are file-level; every node from a given file carries the full import list, not just the imports visible in that node's scope
-- callees_of resolves bare callee names (the strings in node.calls) against known node IDs by suffix match; unresolvable names (builtins, third-party) are silently dropped—callers must not assume completeness
-- blast_radius uses called_by (pre-resolved component IDs) for traversal, NOT calls; the cross-ref pass in cli.py::_index_files must populate called_by before graph functions are meaningful
-- blast_radius returns empty set for an unknown symbol ID rather than raising—callers cannot distinguish 'no upstream callers' from 'symbol not in graph'
-- god_nodes degree = len(called_by) + len(calls) on the raw node fields; it does NOT resolve bare names, so external calls that appear in calls inflate degree artificially
-- repo_map token budget is approximate (not exact tokenization); the test uses ~4 chars/token with a 6× slack factor, meaning output can exceed max_tokens in characters if symbol names are short
+- Blast radius operations exclude the input node by definition; a node is never part of its own downstream impact set.
+- The `god_nodes` function returns results sorted by degree, but its output size is clamped by the input N parameter, even if total nodes are fewer.
+- PageRank implementations expect all node keys to be present in the returned dictionary, with values guaranteed to sum to approximately 1.0.
+- AST cache files must be treated as transient; the test suite uses `TemporaryDirectory` to ensure filesystem isolation during roundtrip verification.
+- Callers/Callees logic filters out unresolvable external names, meaning the graph only contains internal code references.
 
 ## Workflow — How to Answer Questions About This Codebase
 
