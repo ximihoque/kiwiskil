@@ -9,6 +9,7 @@ from indexer.git import all_tracked_files, is_git_repo
 from indexer.hooks import HOOK_MARKER
 from indexer.langs import is_indexable
 from indexer.manifest import Manifest
+from indexer.wiki import page_relpath
 
 CLAUDE_MD_MARKER = "Codebase Navigation"
 CACHE_GITIGNORE_ENTRY = ".indexer/cache/"
@@ -102,7 +103,22 @@ def scan(root: Path, cfg: Config, manifest: Manifest, skip_deep: bool = False, c
             for p in wiki_dir.glob("*.md")
             if p.name != "INDEX.md"
         }
-        report.orphan_wiki_pages = sorted(actual_pages - referenced_pages)
+        # A page is a TRUE orphan only if no source file backs it — i.e. its
+        # files were deleted/moved. A page that's merely absent from the manifest
+        # (a stale/partial manifest: clone where last_indexed_commit != HEAD, or
+        # an .indexer.toml rewrite) is NOT an orphan: deleting it wipes a valid
+        # page for an untouched group. So keep any page that the CURRENT tracked
+        # files would group to, on top of the manifest's referenced pages. This
+        # is the --smart sibling of the --staged wipe guard: never delete a page
+        # whose backing files still exist, only one whose files are gone.
+        expected_pages = referenced_pages
+        if is_git_repo(root):
+            from indexer.grouper import density_group
+            groups = density_group(sorted(tracked), merge_threshold=cfg.merge_threshold)
+            expected_pages = referenced_pages | {
+                page_relpath(cfg.wiki_dir, g) for g in set(groups.values())
+            }
+        report.orphan_wiki_pages = sorted(actual_pages - expected_pages)
 
     # INDEX + skill file existence
     if not (wiki_dir / "INDEX.md").exists():

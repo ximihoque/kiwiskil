@@ -455,3 +455,56 @@ def test_staged_run_does_not_delete_pages_for_unstaged_files(monkeypatch):
         # they MUST survive. The bug deleted them.
         assert (root / "wiki" / "beta.md").exists(), "beta.md was wrongly deleted on a staged run"
         assert (root / "wiki" / "gamma.md").exists(), "gamma.md was wrongly deleted on a staged run"
+
+
+def test_smart_does_not_delete_pages_for_untouched_groups(monkeypatch):
+    """Sibling of the --staged wipe, on the --smart/repair path. When the
+    committed manifest is stale or partial (its last_indexed_commit != HEAD, or
+    it only references a subset of the repo's pages — e.g. a clone where the box
+    rewrote .indexer.toml), verify.scan flags every on-disk page NOT referenced
+    by that manifest as an "orphan", and repair.execute unlinked them all with
+    no full_repo-style gate. A smart repair must NEVER delete a page whose source
+    files are still tracked but simply absent from the (stale) manifest — only a
+    page whose backing files are genuinely gone is a true orphan.
+
+    Observed in prod: a 200-file UI repo with a committed 28-page map indexed to
+    only 5 modules because --smart deleted 23 pages for untouched groups."""
+    _stub_llm(monkeypatch)
+    runner = CliRunner()
+    with runner.isolated_filesystem() as d:
+        root = Path(d)
+        _bootstrap_repo(root)
+        (root / ".indexer.toml").write_text(
+            '[llm]\nprovider="anthropic/claude-sonnet-4-6"\napi_key_env=""\n'
+            '[indexer]\nwiki_dir="wiki"\nignore=[]\nmax_tokens_per_batch=8000\nmerge_threshold=1\n'
+            '[hooks]\npre_commit=false\nsynthesize_commit_message=false\ndeep=false\n'
+        )
+        for pkg in ("alpha", "beta", "gamma"):
+            (root / pkg).mkdir()
+            (root / pkg / "m.py").write_text(f"def {pkg}_fn(): pass\n")
+        subprocess.run(["git", "add", "."], cwd=root, check=True)
+        subprocess.run(["git", "commit", "-q", "-m", "init"], cwd=root, check=True)
+
+        # A full index produced pages for ALL three groups (the committed map).
+        assert runner.invoke(main, ["run", "--force", "--skip-deep"]).exit_code == 0
+        assert (root / "wiki" / "beta.md").exists()
+        assert (root / "wiki" / "gamma.md").exists()
+
+        # Simulate the prod condition: a STALE/partial manifest that only knows
+        # about alpha (last_indexed_commit != HEAD; beta/gamma absent from it),
+        # while beta.md / gamma.md are still on disk and their files still tracked.
+        from indexer.manifest import Manifest, FileEntry, save_manifest, compute_hash
+        save_manifest(root, Manifest(
+            last_indexed_commit="stale-commit-sha", indexed_at="old",
+            files={"alpha/m.py": FileEntry(
+                hash=compute_hash(root / "alpha" / "m.py"),
+                wiki_page="wiki/alpha.md", component_ids=[])},
+        ))
+
+        # A --smart run repairs the drift. It must NOT delete beta.md / gamma.md:
+        # their source files are tracked, they're just missing from the stale
+        # manifest. The bug deleted them as "orphans" -> only alpha survives.
+        assert runner.invoke(main, ["run", "--smart", "--skip-deep"]).exit_code == 0
+
+        assert (root / "wiki" / "beta.md").exists(), "beta.md wrongly deleted on a smart repair"
+        assert (root / "wiki" / "gamma.md").exists(), "gamma.md wrongly deleted on a smart repair"
