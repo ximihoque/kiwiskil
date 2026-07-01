@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kiwiskil"
-version = "0.4.2"
+version = "0.4.3"
 description = "Your codebase, understood by any LLM. Generate a checked-in wiki and skill files from any repo — no cloud, no lock-in."
 readme = "README.md"
 license = { text = "MIT" }

@@ -58,7 +58,9 @@ def _claude_cli_completion(model: str, system: str, user: str) -> str:
 def _complete(system: str, user: str, cfg: Config, *, deep: bool = False) -> str:
     """Single provider dispatcher for every LLM call. Priority:
 
-      1. Explicit API key (env var or inline)  -> Anthropic SDK / LiteLLM.
+      1. Explicit API key (env var or inline)  -> LiteLLM, or the Anthropic SDK
+         for anthropic/claude providers *unless* a base_url is set (a base_url
+         forces the OpenAI-compatible LiteLLM path for every provider).
       2. Anthropic provider + no key + `claude` CLI on PATH -> the CLI (free for
          logged-in Claude subscribers).
       3. Neither -> raise; public functions catch it and emit structural-only.
@@ -70,12 +72,20 @@ def _complete(system: str, user: str, cfg: Config, *, deep: bool = False) -> str
     api_key = _resolve_api_key(cfg)
 
     if api_key is not None:
-        if _is_anthropic(cfg):
+        # A configured base_url means "route through an OpenAI-compatible endpoint",
+        # so it takes priority even for anthropic/claude providers — the Anthropic
+        # SDK hardcodes api.anthropic.com and would silently drop base_url. litellm
+        # honors base_url for every provider (incl. anthropic/*).
+        if _is_anthropic(cfg) and not cfg.base_url:
             return _anthropic_completion(cfg.provider, system, user, api_key)
         import litellm
+        # base_url lets OpenAI-compatible providers (OpenCode Zen, custom LiteLLM
+        # proxies, etc.) route through an endpoint litellm doesn't know natively.
+        # None when unset -> litellm falls back to the provider's default base URL.
         response = litellm.completion(
             model=cfg.provider,
             api_key=api_key,
+            base_url=cfg.base_url or None,
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},

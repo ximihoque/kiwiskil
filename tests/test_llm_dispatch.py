@@ -38,6 +38,122 @@ def test_explicit_api_key_takes_priority_over_cli(monkeypatch):
     assert "sdk" in called and "cli" not in called
 
 
+def test_litellm_receives_base_url_when_configured(monkeypatch):
+    """OpenAI-compatible provider + base_url -> base_url is passed to litellm."""
+    monkeypatch.setattr(llm, "_resolve_api_key", lambda cfg: "sk-real")
+    seen = {}
+
+    class FakeMsg:
+        content = "OK"
+
+    class FakeChoice:
+        message = FakeMsg()
+
+    class FakeResp:
+        choices = [FakeChoice()]
+
+    import sys, types
+    fake_litellm = types.ModuleType("litellm")
+    fake_litellm.completion = lambda **kw: seen.update(kw) or FakeResp()
+    monkeypatch.setitem(sys.modules, "litellm", fake_litellm)
+
+    out = llm._complete(
+        "sys", "usr",
+        _cfg(provider="openai/minimax-m2.7", base_url="https://opencode.ai/zen/v1"),
+    )
+    assert out == "OK"
+    assert seen["base_url"] == "https://opencode.ai/zen/v1"
+    assert seen["model"] == "openai/minimax-m2.7"
+    assert seen["api_key"] == "sk-real"
+
+
+def test_litellm_base_url_none_when_unset(monkeypatch):
+    """No base_url configured -> pass base_url=None so litellm uses its default."""
+    monkeypatch.setattr(llm, "_resolve_api_key", lambda cfg: "sk-real")
+    seen = {}
+
+    class FakeMsg:
+        content = "OK"
+
+    class FakeChoice:
+        message = FakeMsg()
+
+    class FakeResp:
+        choices = [FakeChoice()]
+
+    import sys, types
+    fake_litellm = types.ModuleType("litellm")
+    fake_litellm.completion = lambda **kw: seen.update(kw) or FakeResp()
+    monkeypatch.setitem(sys.modules, "litellm", fake_litellm)
+
+    llm._complete("sys", "usr", _cfg(provider="openai/gpt-4o"))  # no base_url
+    assert seen["base_url"] is None
+
+
+def test_base_url_routes_anthropic_provider_through_litellm(monkeypatch):
+    """A base_url set on an anthropic/claude provider must route through litellm
+    (honoring base_url) rather than the Anthropic SDK (which hardcodes the
+    api.anthropic.com endpoint and would silently drop base_url)."""
+    monkeypatch.setattr(llm, "_resolve_api_key", lambda cfg: "sk-real")
+    seen = {}
+    sdk_called = {}
+
+    def fake_sdk(model, s, u, k):
+        sdk_called["hit"] = True
+        return "SDK"
+
+    monkeypatch.setattr(llm, "_anthropic_completion", fake_sdk)
+
+    class FakeMsg:
+        content = "LITELLM"
+
+    class FakeChoice:
+        message = FakeMsg()
+
+    class FakeResp:
+        choices = [FakeChoice()]
+
+    import sys, types
+    fake_litellm = types.ModuleType("litellm")
+    fake_litellm.completion = lambda **kw: seen.update(kw) or FakeResp()
+    monkeypatch.setitem(sys.modules, "litellm", fake_litellm)
+
+    out = llm._complete(
+        "sys", "usr",
+        _cfg(provider="anthropic/claude-sonnet-4-6", base_url="https://proxy.example/v1"),
+    )
+    assert out == "LITELLM"
+    assert "hit" not in sdk_called  # Anthropic SDK NOT used
+    assert seen["base_url"] == "https://proxy.example/v1"
+    assert seen["model"] == "anthropic/claude-sonnet-4-6"
+
+
+def test_anthropic_provider_without_base_url_uses_sdk(monkeypatch):
+    """Regression guard: an anthropic provider with NO base_url still uses the
+    Anthropic SDK path (the free/default route), not litellm."""
+    monkeypatch.setattr(llm, "_resolve_api_key", lambda cfg: "sk-real")
+    used = {}
+
+    def fake_sdk(model, s, u, k):
+        used["sdk"] = True
+        return "SDK"
+
+    def fake_litellm_completion(**kw):
+        used["litellm"] = True
+        return None
+
+    monkeypatch.setattr(llm, "_anthropic_completion", fake_sdk)
+
+    import sys, types
+    fake_litellm = types.ModuleType("litellm")
+    fake_litellm.completion = fake_litellm_completion
+    monkeypatch.setitem(sys.modules, "litellm", fake_litellm)
+
+    out = llm._complete("sys", "usr", _cfg(provider="anthropic/claude-sonnet-4-6"))
+    assert out == "SDK"
+    assert used == {"sdk": True}  # litellm never touched
+
+
 def test_falls_back_to_cli_when_no_key_and_cli_present(monkeypatch):
     """Anthropic provider + no API key + claude CLI on PATH -> use the CLI."""
     monkeypatch.setattr(llm, "_resolve_api_key", lambda cfg: None)

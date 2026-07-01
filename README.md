@@ -88,6 +88,7 @@ kiwiskil status                  # last indexed commit, stale files, stats
 [llm]
 provider = "anthropic/claude-sonnet-4-6"  # any LiteLLM model; leave api_key_env unset to use the claude CLI
 api_key_env = "ANTHROPIC_API_KEY"
+# base_url = "https://opencode.ai/zen/v1"  # optional: route OpenAI-compatible endpoints (OpenCode Zen, LiteLLM proxies, …)
 
 [indexer]
 map_tokens = 1024          # token budget for the ranked repo map

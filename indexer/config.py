@@ -11,6 +11,7 @@ FILENAME = ".indexer.toml"
 class Config:
     provider: str = "anthropic/claude-sonnet-4-6"
     api_key_env: str = "ANTHROPIC_API_KEY"
+    base_url: str = ""  # OpenAI-compatible endpoint override; passed to litellm when set
     wiki_dir: str = "wiki"
     ignore: list[str] = field(default_factory=lambda: [
         "node_modules", ".venv", "dist", "build", "__pycache__", "*.test.*"
@@ -35,6 +36,7 @@ def load_config(repo_root: Path) -> Config:
     return Config(
         provider=llm.get("provider", defaults.provider),
         api_key_env=llm.get("api_key_env", defaults.api_key_env),
+        base_url=llm.get("base_url", defaults.base_url),
         wiki_dir=idx.get("wiki_dir", defaults.wiki_dir),
         ignore=list(idx.get("ignore", defaults.ignore)),
         max_tokens_per_batch=idx.get("max_tokens_per_batch", defaults.max_tokens_per_batch),
@@ -46,8 +48,13 @@ def load_config(repo_root: Path) -> Config:
     )
 
 def save_config(repo_root: Path, cfg: Config) -> None:
+    llm_section = {"provider": cfg.provider, "api_key_env": cfg.api_key_env}
+    if cfg.base_url:
+        # Only persist when set — keeps the default config clean and lets an
+        # absent key fall back to litellm's provider-native base URL.
+        llm_section["base_url"] = cfg.base_url
     data = {
-        "llm": {"provider": cfg.provider, "api_key_env": cfg.api_key_env},
+        "llm": llm_section,
         "indexer": {"wiki_dir": cfg.wiki_dir, "ignore": cfg.ignore, "max_tokens_per_batch": cfg.max_tokens_per_batch, "merge_threshold": cfg.merge_threshold, "map_tokens": cfg.map_tokens},
         "hooks": {"pre_commit": cfg.pre_commit, "synthesize_commit_message": cfg.synthesize_commit_message, "deep": cfg.deep_hook},
     }

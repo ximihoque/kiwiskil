@@ -1,6 +1,6 @@
 {
-  "last_indexed_commit": "354cb313b1ed28da45f5d9e1f31e4b8267b26e1c",
-  "indexed_at": "2026-06-29T09:16:53.143372+00:00",
+  "last_indexed_commit": "76002e95a8e800f565b122b68a775c9245d75ff1",
+  "indexed_at": "2026-07-01T15:33:56.404347+00:00",
   "files": {
     "indexer/__init__.py": {
       "hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -75,7 +75,7 @@
       }
     },
     "indexer/config.py": {
-      "hash": "sha256:2bc3362fc6cdd60244c3067069074ca228bf0fa630d3e03e0e2acf1616ae3b49",
+      "hash": "sha256:9741ff18659dc89a3865dd72aaa2c7c5c798a928fea90609e72122a12adc15e0",
       "wiki_page": "wiki/indexer.md",
       "component_ids": [
         "indexer/config.py::Config",
@@ -213,7 +213,7 @@
       }
     },
     "indexer/llm.py": {
-      "hash": "sha256:0d55d70ad03b08015cb84cd99b25df2c7643a4b3e2cab2e84e41ec262d5b6b6f",
+      "hash": "sha256:ae5e20154e5ae84770545a8ec7e1d5f4f7b7fda026081170540cf3e5804ebc76",
       "wiki_page": "wiki/indexer.md",
       "component_ids": [
         "indexer/llm.py::_is_anthropic",
@@ -507,17 +507,23 @@
       }
     },
     "tests/test_config.py": {
-      "hash": "sha256:d4f0916ebe1c168a897a657077b118af0185c66bdef679cf3b8b468ef4ca56e4",
+      "hash": "sha256:2868b242ab3ada46e91f9fc4d17da65fb7cc3b76fe92df84926077f49c02ed2e",
       "wiki_page": "wiki/tests.md",
       "component_ids": [
         "tests/test_config.py::test_load_defaults",
         "tests/test_config.py::test_save_and_reload",
-        "tests/test_config.py::test_partial_toml_uses_defaults"
+        "tests/test_config.py::test_partial_toml_uses_defaults",
+        "tests/test_config.py::test_base_url_defaults_empty",
+        "tests/test_config.py::test_base_url_loads_from_toml",
+        "tests/test_config.py::test_base_url_roundtrips_through_save"
       ],
       "scip": {
         "tests/test_config.py::test_load_defaults": "tests/test_config.py/ test_load_defaults().",
         "tests/test_config.py::test_save_and_reload": "tests/test_config.py/ test_save_and_reload().",
-        "tests/test_config.py::test_partial_toml_uses_defaults": "tests/test_config.py/ test_partial_toml_uses_defaults()."
+        "tests/test_config.py::test_partial_toml_uses_defaults": "tests/test_config.py/ test_partial_toml_uses_defaults().",
+        "tests/test_config.py::test_base_url_defaults_empty": "tests/test_config.py/ test_base_url_defaults_empty().",
+        "tests/test_config.py::test_base_url_loads_from_toml": "tests/test_config.py/ test_base_url_loads_from_toml().",
+        "tests/test_config.py::test_base_url_roundtrips_through_save": "tests/test_config.py/ test_base_url_roundtrips_through_save()."
       }
     },
     "tests/test_graph.py": {
@@ -651,11 +657,15 @@
       }
     },
     "tests/test_llm_dispatch.py": {
-      "hash": "sha256:fa12c5eff525824413cb4ca2636ba77842dca0ec68c3bf396b21e241d8ea9ef2",
+      "hash": "sha256:2ef5072a76fc3db9fde1a16dddf39b4b378098757cf33d347737d46d6f1a27b0",
       "wiki_page": "wiki/tests.md",
       "component_ids": [
         "tests/test_llm_dispatch.py::_cfg",
         "tests/test_llm_dispatch.py::test_explicit_api_key_takes_priority_over_cli",
+        "tests/test_llm_dispatch.py::test_litellm_receives_base_url_when_configured",
+        "tests/test_llm_dispatch.py::test_litellm_base_url_none_when_unset",
+        "tests/test_llm_dispatch.py::test_base_url_routes_anthropic_provider_through_litellm",
+        "tests/test_llm_dispatch.py::test_anthropic_provider_without_base_url_uses_sdk",
         "tests/test_llm_dispatch.py::test_falls_back_to_cli_when_no_key_and_cli_present",
         "tests/test_llm_dispatch.py::test_deep_flag_uses_configured_model_cli",
         "tests/test_llm_dispatch.py::test_no_key_no_cli_raises_so_callers_fall_back",
@@ -670,6 +680,18 @@
         "tests/test_llm_dispatch.py::test_clean_json_raises_on_garbage",
         "tests/test_llm_dispatch.py::fake_sdk",
         "tests/test_llm_dispatch.py::fake_cli",
+        "tests/test_llm_dispatch.py::FakeMsg",
+        "tests/test_llm_dispatch.py::FakeChoice",
+        "tests/test_llm_dispatch.py::FakeResp",
+        "tests/test_llm_dispatch.py::FakeMsg",
+        "tests/test_llm_dispatch.py::FakeChoice",
+        "tests/test_llm_dispatch.py::FakeResp",
+        "tests/test_llm_dispatch.py::fake_sdk",
+        "tests/test_llm_dispatch.py::FakeMsg",
+        "tests/test_llm_dispatch.py::FakeChoice",
+        "tests/test_llm_dispatch.py::FakeResp",
+        "tests/test_llm_dispatch.py::fake_sdk",
+        "tests/test_llm_dispatch.py::fake_litellm_completion",
         "tests/test_llm_dispatch.py::fake_cli",
         "tests/test_llm_dispatch.py::FakeProc",
         "tests/test_llm_dispatch.py::fake_run",
@@ -678,6 +700,10 @@
       "scip": {
         "tests/test_llm_dispatch.py::_cfg": "tests/test_llm_dispatch.py/ _cfg().",
         "tests/test_llm_dispatch.py::test_explicit_api_key_takes_priority_over_cli": "tests/test_llm_dispatch.py/ test_explicit_api_key_takes_priority_over_cli().",
+        "tests/test_llm_dispatch.py::test_litellm_receives_base_url_when_configured": "tests/test_llm_dispatch.py/ test_litellm_receives_base_url_when_configured().",
+        "tests/test_llm_dispatch.py::test_litellm_base_url_none_when_unset": "tests/test_llm_dispatch.py/ test_litellm_base_url_none_when_unset().",
+        "tests/test_llm_dispatch.py::test_base_url_routes_anthropic_provider_through_litellm": "tests/test_llm_dispatch.py/ test_base_url_routes_anthropic_provider_through_litellm().",
+        "tests/test_llm_dispatch.py::test_anthropic_provider_without_base_url_uses_sdk": "tests/test_llm_dispatch.py/ test_anthropic_provider_without_base_url_uses_sdk().",
         "tests/test_llm_dispatch.py::test_falls_back_to_cli_when_no_key_and_cli_present": "tests/test_llm_dispatch.py/ test_falls_back_to_cli_when_no_key_and_cli_present().",
         "tests/test_llm_dispatch.py::test_deep_flag_uses_configured_model_cli": "tests/test_llm_dispatch.py/ test_deep_flag_uses_configured_model_cli().",
         "tests/test_llm_dispatch.py::test_no_key_no_cli_raises_so_callers_fall_back": "tests/test_llm_dispatch.py/ test_no_key_no_cli_raises_so_callers_fall_back().",
@@ -692,6 +718,10 @@
         "tests/test_llm_dispatch.py::test_clean_json_raises_on_garbage": "tests/test_llm_dispatch.py/ test_clean_json_raises_on_garbage().",
         "tests/test_llm_dispatch.py::fake_sdk": "tests/test_llm_dispatch.py/ fake_sdk().",
         "tests/test_llm_dispatch.py::fake_cli": "tests/test_llm_dispatch.py/ fake_cli().",
+        "tests/test_llm_dispatch.py::FakeMsg": "tests/test_llm_dispatch.py/ FakeMsg#",
+        "tests/test_llm_dispatch.py::FakeChoice": "tests/test_llm_dispatch.py/ FakeChoice#",
+        "tests/test_llm_dispatch.py::FakeResp": "tests/test_llm_dispatch.py/ FakeResp#",
+        "tests/test_llm_dispatch.py::fake_litellm_completion": "tests/test_llm_dispatch.py/ fake_litellm_completion().",
         "tests/test_llm_dispatch.py::FakeProc": "tests/test_llm_dispatch.py/ FakeProc#",
         "tests/test_llm_dispatch.py::fake_run": "tests/test_llm_dispatch.py/ fake_run()."
       }

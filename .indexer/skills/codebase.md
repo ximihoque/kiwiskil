@@ -20,17 +20,19 @@ The wiki captures structure, relationships, and constraints in a fraction of the
 
 ## Stats
 
-- **354 symbols** across **37 files** — indexed 2026-06-29 @ `354cb313`
+- **373 symbols** across **37 files** — indexed 2026-07-01 @ `76002e95`
 - Wiki: `wiki/` — 3 page(s)
 - Manifest: `.indexer/manifest.json` — maps every file to its wiki page and component IDs
 
 ## System Overview
 
-The indexer is a polyglot codebase analysis engine that translates source code into a structured SCIP graph for downstream LLM consumption. It coordinates multi-language parsing via `ast_parser.py` and `ts_extract.py`, which feed a central `graph.py` structure managed by `grouper.py` and `manifest.py`. The `llm.py` and `repair.py` modules integrate AI-driven analysis to validate and fix index inconsistencies, orchestrated by a CLI interface that leverages `config.py` for environment-specific execution.
+kiwiskil is a polyglot codebase indexing engine that transforms a git repository into a structured, LLM-navigable wiki. The pipeline runs through five sequential phases orchestrated by `cli.py` (`_index_files` → `_finalise_index_and_skill`): source files are discovered via `git.py`, parsed into `ASTNode` records by `ast_parser.py` (Python stdlib AST), `js_parser.py` (tree-sitter JS/TS), and `ts_extract.py` (tree-sitter Go/Java/Ruby/Rust), then described by `llm.py` (Anthropic SDK / claude CLI / LiteLLM). `grouper.py` clusters files into wiki pages by density-based folder merging; `wiki.py` renders Jinja2 templates into `wiki/*.md` and `wiki/INDEX.md`; `manifest.py` persists file hashes and SCIP component IDs for incremental re-indexing. `graph.py` computes PageRank, blast radius, and god-node rankings over the call graph to drive `repo_map` and per-symbol relationship sections. `verify.py` detects drift (stale files, missing pages, orphaned entries), and `repair.py` translates a `VerifyReport` into a `RepairPlan` that `_run_smart` executes without a full re-index.
 ## Key Request Flows
-- Source code discovery → git.py/manifest.py detection → ast_parser.py/ts_extract.py parsing → scip.py graph generation
-- SCIP graph initialization → grouper.py entity clustering → llm.py analysis hook → repair.py consistency patching
-- CLI configuration load → indexer core processing → verify.py integrity check → wiki.py documentation generation
+- Full index run: `cli.run` → `git.all_tracked_files` → `_index_and_persist` → `_index_files` (parse → `llm.describe_nodes`/`describe_files`/`deep_enrich_page` → `build_blast_radius_map` → `wiki.build_page`/`write_page`) → `_finalise_index_and_skill` (`graph.repo_map`/`god_nodes` → `llm.deep_enrich_index` → `wiki.build_index`/`write_index`) → `manifest.save_manifest`
+- Smart incremental repair: `cli.run --smart` → `_run_smart` → `verify.scan` (VerifyReport) → `repair.plan` (RepairPlan) → `repair.execute` → `_index_files` (stale files only) → `_finalise_index_and_skill` → `save_manifest`
+- LLM dispatch: `llm.describe_nodes`/`deep_enrich_page`/`deep_enrich_index` → `_complete` → `_is_anthropic` branch: `_anthropic_completion` (Anthropic SDK) | `_claude_cli_completion` (subprocess claude CLI) | `completion` (LiteLLM) → `_clean_json` (parse fenced/bare JSON response)
+- Source parsing: `_index_files` → `ast_parser.parse_file` → Python: stdlib `ast.walk` | JS/TS: `js_parser.parse_js_file` (tree-sitter) | Go/Java/Ruby/Rust: `ts_extract.extract_generic` (tree-sitter LangConfig) → `ASTNode` list → `scip.scip_symbol` → `manifest.file_entry_for` → `Manifest`
+- Pre-commit hook flow: `hooks.install_hook` (writes `.git/hooks/pre-commit` via `_hook_script_fresh`/`_hook_script_append`) → git commit triggers hook → `cli.run --staged` → `git.staged_files` → `_index_and_persist` (staged files expanded to groups via `_expand_candidates_to_groups`) → `manifest.save_manifest` → `synthesize_commit_message`
 
 ## Wiki Pages
 
@@ -41,17 +43,19 @@ The indexer is a polyglot codebase analysis engine that translates source code i
 | [tests_fixtures](../wiki/tests_fixtures.md) | tests/fixtures/sample_go/server.go, tests/fixtures/sample_java/Widget.java, tests/fixtures/sample_py/auth.py, tests/fixtures/sample_ruby/widget.rb, tests/fixtures/sample_rust/widget.rs |  |
 ## Critical Constraints (read before editing)
 **indexer**
-- The `parse_file` function returns an empty list upon encountering any syntax error, rather than raising an exception.
-- Cached AST nodes are stored as JSON files; manual modification of these files may result in deserialization errors or corrupted index states.
-- The `_ensure_nav_guidance` method is idempotent and should be called whenever initializing a repo to ensure CLAUDE.md integrity.
-- File tracking is strictly dependent on the existence of a `.git` repository; operations requiring `is_git_repo` will fail in detached environments.
-- The system performs grouping based on logic density; file membership in a group is determined by `density_group` and cannot be manually overridden.
+- full_repo=True is required to enable destructive cleanup (manifest prune + orphan wiki page deletion); on partial/staged runs this flag MUST be False or the entire wiki is wiped for every file not in the current candidate set
+- called_by on ASTNode is always empty after parse_file(); it is populated only in the cross-reference pass inside _index_files() by matching bare function names across all nodes — meaning cached nodes loaded from disk also have empty called_by and are re-linked each run
+- AST cache keys are the first 16 hex chars of the file sha256, stored at .indexer/cache/<hash>.json; cache is never invalidated by time, only by file content hash change — a corrupted cache file returns None (re-parses silently) but a structurally valid but semantically stale cache (e.g. bug in old parse logic) will be used as-is until the file changes
+- staged_files() uses --diff-filter=ACM, so deleted files are never returned; deletion reconciliation only happens via _prune_deleted() on a no-candidates run or as part of full_repo cleanup — a staged deletion without any other staged file will not trigger wiki cleanup until the next non-staged run
+- Config.merge_threshold controls density_group() page merging; changing it mid-life restructures the entire wiki layout, making every incremental run produce different page assignments than the existing manifest — a full re-index (--force) is required after changing this value
+- NAV_GUIDANCE_MARKER ('Codebase Navigation') is used as an idempotency sentinel in both _ensure_nav_guidance() and verify.py; if the heading text changes in one place but not the other, guidance will be written twice or the verify check will falsely report drift
 **tests**
-- Blast radius operations exclude the input node by definition; a node is never part of its own downstream impact set.
-- The `god_nodes` function returns results sorted by degree, but its output size is clamped by the input N parameter, even if total nodes are fewer.
-- PageRank implementations expect all node keys to be present in the returned dictionary, with values guaranteed to sum to approximately 1.0.
-- AST cache files must be treated as transient; the test suite uses `TemporaryDirectory` to ensure filesystem isolation during roundtrip verification.
-- Callers/Callees logic filters out unresolvable external names, meaning the graph only contains internal code references.
+- blast_radius uses called_by (pre-resolved component IDs), not calls (bare names); callers_of reads called_by directly while callees_of performs bare-name resolution against the node list — mixing the two fields incorrectly will silently return wrong results
+- callees_of drops any bare name that cannot be resolved to a known node ID; external stdlib calls (e.g. 'print') are silently discarded, not errored
+- blast_radius excludes the queried symbol itself from its result set and must terminate on cycles — tests confirm both; any implementation that includes self or loops infinitely fails
+- god_nodes degree is sum of len(called_by) + len(calls) per node (both directions), not just in-degree; the test fixture confirms hub with 3 callers + 2 callees scores 5
+- pagerank must sum to 1.0 within 1e-6 tolerance and be deterministic across repeated calls on the same input; symmetric mutual-call pairs must yield equal rank
+- load_config merges a partial TOML file with Config() defaults field-by-field — missing TOML keys fall back to the dataclass default, not to None; base_url defaults to empty string '', not None
 
 ## Workflow — How to Answer Questions About This Codebase
 
